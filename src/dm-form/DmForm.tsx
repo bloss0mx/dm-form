@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Form } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
+import { FormComponentProps, FormCreateOption } from 'antd/es/form';
 import { content } from './formChildrenDealer';
 import { FormProps, value } from './formChildrenDealer';
 
@@ -15,7 +15,8 @@ interface FormOnly<T> {
  */
 export default function DmFormFactory<T>(
   InitialForm?: T,
-  actions?: FormProps<T> & FormOnly<T>
+  actions?: FormProps<T> & FormOnly<T>,
+  FormCreateOption?: FormCreateOption<any>
 ) {
   function DmForm<P>(
     props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
@@ -37,33 +38,22 @@ export default function DmFormFactory<T>(
       });
     }
 
-    function onChange(name: string, value: any) {
-      if (actions && actions.onChange) {
-        setImmediate(() => {
-          if (typeof actions.onChange === 'function') {
-            const allValues = getFieldsValue();
-            actions.onChange(name, value, allValues as T);
-          }
-        });
-      }
-    }
-
     return (
       <Form
         labelCol={{
           xs: { span: 24 },
-          sm: { span: 8 }
+          sm: { span: 4 }
         }}
         wrapperCol={{
           xs: { span: 24 },
-          sm: { span: 16 }
+          sm: { span: 20 }
         }}
         onSubmit={handleSubmit}
       >
-        {content({ ...props, onChange })}
+        {content({ ...{ form: props.form, children: props.children } })}
       </Form>
     );
   }
 
-  return Form.create()(DmForm);
+  return Form.create(FormCreateOption)(DmForm);
 }

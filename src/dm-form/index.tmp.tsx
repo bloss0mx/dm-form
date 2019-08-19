@@ -37,38 +37,16 @@ type state = {
   time: Moment;
   fields: {
     username: {
-      value: string;
-    };
-    password: {
-      value: string;
-    };
-    ayeaye: {
-      value: string;
-    };
-    nyeney: {
-      value: string;
-    };
-    ayeayehao: {
-      value: string;
-    };
-    test: {
-      value: string;
-    };
-    tedst: {
-      value: string;
-    };
-    qewr: {
-      value: string;
-    };
-    email: {
-      value: string;
-    };
-    date: { value: [Moment, Moment] };
-    emaild: {
-      value: string;
-    };
-    uu: {
-      value: string;
+      username: string;
+      password: string;
+      ayeaye: string;
+      nyeney: string;
+      ayeayehao: string;
+      test: string;
+      tedst: string;
+      qewr: string;
+      email: string;
+      date: [Moment, Moment];
     };
   };
 };
@@ -82,38 +60,16 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
       time: moment(),
       fields: {
         username: {
-          value: 'niubiguai'
-        },
-        password: {
-          value: '123456'
-        },
-        ayeaye: {
-          value: '12'
-        },
-        nyeney: {
-          value: '23'
-        },
-        ayeayehao: {
-          value: 'asdf'
-        },
-        test: {
-          value: 'qwer'
-        },
-        tedst: {
-          value: 'zxcv'
-        },
-        qewr: {
-          value: 'fdsa'
-        },
-        email: {
-          value: 'rewq'
-        },
-        date: { value: [moment().startOf('day'), moment().endOf('day')] },
-        emaild: {
-          value: 'niubi@163.com'
-        },
-        uu: {
-          value: 'niubi'
+          username: 'xliu',
+          password: 'aaaaaa',
+          ayeaye: 'aaa',
+          nyeney: 'bbb',
+          ayeayehao: 'ccc',
+          test: 'asdfwerq',
+          tedst: 'qwer',
+          qewr: 'zsdfasdf',
+          email: 'hlossem@154.com',
+          date: [moment().startOf('day'), moment().endOf('day')]
         }
       }
     } as state;
@@ -123,7 +79,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
         const that = this;
         return [
           {
-            // ...that.state.fields.username
+            ...that.state.fields.username
           },
           {
             onSubmit(values: any) {
@@ -131,21 +87,36 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
             }
           },
           {
-            name: 'global_state',
-            onFieldsChange(props: any, changedFields: any) {
-              (props as any).onChange(changedFields);
-            },
+            name: 'username',
             mapPropsToFields(props: any) {
-              const t: any = {};
-              for (const i in props) {
-                if (props.hasOwnProperty(i) && i !== 'children') {
-                  t[i] = FormAntd.createFormField({ ...props[i] });
-                }
-              }
-              return t;
-            },
-            onValuesChange(_: any, values: any) {
-              // console.log(values);
+              console.log({
+                username: FormAntd.createFormField({
+                  ...props.username
+                  // username: props.username.username,
+                  // password: props.username.password,
+                  // ayeaye: props.username.ayeaye,
+                  // nyeney: props.username.nyeney,
+                  // ayeayehao: props.username.ayeayehao,
+                  // test: props.username.test,
+                  // tedst: props.username.tedst,
+                  // qewr: props.username.qewr,
+                  // email: props.username.email
+                })
+              });
+              return {
+                username: FormAntd.createFormField({
+                  ...props.username
+                  // username: props.username.username,
+                  // password: props.username.password,
+                  // ayeaye: props.username.ayeaye,
+                  // nyeney: props.username.nyeney,
+                  // ayeayehao: props.username.ayeayehao,
+                  // test: props.username.test,
+                  // tedst: props.username.tedst,
+                  // qewr: props.username.qewr,
+                  // email: props.username.email
+                })
+              };
             }
           }
         ];
@@ -153,28 +124,32 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
     );
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState(state => {
+        state.fields.username.nyeney = 'bbbbbbbb';
+        return state;
+      });
+    }, 5000);
+
+    setInterval(() => {
+      this.setState({
+        time: moment()
+      });
+    }, 1000);
+  }
+
   handleSubmit(values: any) {
     console.log(values);
   }
-
-  handleFormChange = (changedFields: any) => {
-    this.setState(
-      (state: any) => ({
-        fields: { ...state.fields, ...changedFields }
-      }),
-      () => {
-        console.log(this.state);
-      }
-    );
-  };
 
   render() {
     const { time, fields } = this.state;
     return (
       <div style={{ width: '500px' }}>
         {time.format('YYYY-MM-DD HH:mm:ss')}
-        <this.Form {...fields} onChange={this.handleFormChange}>
-          <Input name="username" label="牛逼" />
+        <this.Form {...fields}>
+          <Login name="username" type="username" />
           <Login
             name="password"
             type="password"
@@ -231,16 +206,6 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               </FormItem>
             </div>
           </FormItem>
-          <h2>hey</h2>
-          {({ form: { getFieldDecorator } }: FormComponentProps) => {
-            return (
-              <FormAntd.Item label={'自定义组件'}>
-                {getFieldDecorator('uu', {
-                  rules: [{ required: true, message: 'Username is required!' }]
-                })(<InputAntd />)}
-              </FormAntd.Item>
-            );
-          }}
           <Login name="test" type="username" />
           <Login name="tedst" type="username" />
           <DatePicker name="date" type="RangePicker" label="日期" />
@@ -248,6 +213,62 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <Input name="emaild" type="email" label="牛逼" />
           <Submit name="submit" />
         </this.Form>
+        <Demo />
+      </div>
+    );
+  }
+}
+
+const CustomizedForm = FormAntd.create({
+  name: 'global_state',
+  onFieldsChange(props, changedFields) {
+    (props as any).onChange(changedFields);
+  },
+  mapPropsToFields(props) {
+    return {
+      username: FormAntd.createFormField({
+        ...(props as any).username,
+        value: (props as any).username.value
+      })
+    };
+  },
+  onValuesChange(_, values) {
+    console.log(values);
+  }
+})(props => {
+  const { getFieldDecorator } = (props as any).form;
+  return (
+    <FormAntd layout="inline">
+      <FormAntd.Item label="Username">
+        {getFieldDecorator('username', {
+          rules: [{ required: true, message: 'Username is required!' }]
+        })(<InputAntd />)}
+      </FormAntd.Item>
+    </FormAntd>
+  );
+});
+
+class Demo extends React.Component<any, any> {
+  state: any = {
+    fields: {
+      username: {
+        value: 'benjycui'
+      }
+    }
+  };
+
+  handleFormChange = (changedFields: any) => {
+    this.setState((state: any) => ({
+      fields: { ...state.fields, ...changedFields }
+    }));
+  };
+
+  render() {
+    const { fields } = this.state;
+    return (
+      <div>
+        <CustomizedForm {...fields} onChange={this.handleFormChange} />
+        <pre className="language-bash">{JSON.stringify(fields, null, 2)}</pre>
       </div>
     );
   }

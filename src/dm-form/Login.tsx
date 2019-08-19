@@ -36,16 +36,7 @@ export default function Login(props: anyThing & FormItemProps) {
   const {
     form: { getFieldDecorator, getFieldError, isFieldTouched, getFieldValue }
   } = (props as any) as FormComponentProps;
-  const {
-    name,
-    placeholder,
-    children,
-    rules,
-    type,
-    label,
-    onChange,
-    message
-  } = props;
+  const { name, placeholder, children, rules, type, label, message } = props;
 
   return (
     <Form.Item
@@ -65,13 +56,6 @@ export default function Login(props: anyThing & FormItemProps) {
           children
         ) : (
           <Input
-            onChange={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              setImmediate(() => {
-                onChange && onChange(name, getFieldValue(name));
-              });
-            }}
             type={TYPE_DATA[type].type}
             prefix={TYPE_DATA[type].prefix}
             placeholder={placeholder || ''}

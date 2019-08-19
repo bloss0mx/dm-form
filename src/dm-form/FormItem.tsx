@@ -4,15 +4,25 @@ import { FormComponentProps } from 'antd/es/form';
 import { content, FormProps, value } from './formChildrenDealer';
 
 interface anyThing {
+  label: string;
   style?: React.CSSProperties;
   [name: string]: any;
 }
 
 export default function FormItem<T, P>(
   props: FormProps<T> &
-    FormComponentProps &
+    // FormComponentProps &
     React.PropsWithChildren<P> &
     anyThing
 ) {
-  return <Form.Item style={props.style}>{content({ ...props })}</Form.Item>;
+  return (
+    <Form.Item label={props.label} style={props.style}>
+      {content({
+        ...(props as FormProps<T> &
+          FormComponentProps &
+          React.PropsWithChildren<P> &
+          anyThing)
+      })}
+    </Form.Item>
+  );
 }

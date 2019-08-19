@@ -19,7 +19,7 @@ export default function Checkbox(props: anyThing & FormItemProps) {
   const {
     form: { getFieldDecorator, getFieldError, getFieldValue }
   } = (props as any) as FormComponentProps;
-  const { name, rules, label, onChange, extra } = props;
+  const { name, rules, label, extra } = props;
 
   return (
     <Form.Item
@@ -29,19 +29,7 @@ export default function Checkbox(props: anyThing & FormItemProps) {
     >
       {getFieldDecorator(name, {
         rules
-      })(
-        <CheckboxAntd
-          onChange={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            setImmediate(() => {
-              onChange && onChange(name, getFieldValue(name));
-            });
-          }}
-        >
-          {label}
-        </CheckboxAntd>
-      )}
+      })(<CheckboxAntd>{label}</CheckboxAntd>)}
       {extra}
     </Form.Item>
   );
