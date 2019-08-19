@@ -184,7 +184,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               }
             ]}
           />
-          <FormItem
+          {/* <FormItem
             label="test"
             style={{
               textAlign: 'left'
@@ -230,23 +230,21 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 />
               </FormItem>
             </div>
-          </FormItem>
-          <h2>hey</h2>
-          {({ form: { getFieldDecorator } }: FormComponentProps) => {
-            return (
-              <FormAntd.Item label={'自定义组件'}>
-                {getFieldDecorator('uu', {
-                  rules: [{ required: true, message: 'Username is required!' }]
-                })(<InputAntd />)}
-              </FormAntd.Item>
-            );
-          }}
+          </FormItem> */}
+          {/* <h2>hey</h2>
+          {({ form: { getFieldDecorator } }: FormComponentProps) => (
+            <FormAntd.Item label={'自定义组件'}>
+              {getFieldDecorator('uu', {
+                rules: [{ required: true, message: 'Username is required!' }]
+              })(<InputAntd />)}
+            </FormAntd.Item>
+          )}
           <Login name="test" type="username" />
           <Login name="tedst" type="username" />
           <DatePicker name="date" type="RangePicker" label="日期" />
           <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} />
           <Input name="emaild" type="email" label="牛逼" />
-          <Submit name="submit" />
+          <Submit name="submit" /> */}
         </this.Form>
       </div>
     );

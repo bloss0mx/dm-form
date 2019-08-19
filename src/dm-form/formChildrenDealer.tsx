@@ -21,9 +21,9 @@ function injectProps<T>(
 
 export function content<T, P>(
   props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
-): React.ReactElement | React.ReactNodeArray {
+): React.ReactElement | React.ReactNodeArray | undefined {
   const { children } = props;
-
+  console.log(children);
   if (children && children.constructor === Array) {
     // 此处有点问题，暂时先断言成dmform组件
     return (children as Array<
@@ -47,8 +47,9 @@ export function content<T, P>(
   } else if (React.isValidElement(children)) {
     return injectProps(children, props);
   } else {
-    if (typeof children === 'string') return children as any;
-    throw new Error('Unknow type of children! ');
+    if (children === undefined) return;
+    else if (typeof children === 'string') return children as any;
+    throw new Error(`Unknow type of children! ${children}`);
   }
 }
 
