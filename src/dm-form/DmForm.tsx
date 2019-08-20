@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { Form } from 'antd';
 import { FormComponentProps, FormCreateOption } from 'antd/es/form';
 import { content } from './formChildrenDealer';
@@ -22,7 +22,7 @@ export default function DmFormFactory<T>(
     props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
   ) {
     const {
-      form: { setFieldsValue, validateFields, getFieldsValue }
+      form: { setFieldsValue, validateFields }
     } = props;
 
     useEffect(() => {

@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Icon,
-  Button,
-  Layout,
-  message,
-  Form as FormAntd,
-  // DatePicker,
-  Input as InputAntd
-} from 'antd';
+import { Form as FormAntd, Input as InputAntd } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
 
@@ -119,37 +111,32 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
     } as state;
 
     this.Form = DmForm(
-      ...(() => {
-        const that = this;
-        return [
-          {
-            // ...that.state.fields.username
-          },
-          {
-            onSubmit(values: any) {
-              console.table(values);
-            }
-          },
-          {
-            name: 'global_state',
-            onFieldsChange(props: any, changedFields: any) {
-              (props as any).onChange(changedFields);
-            },
-            mapPropsToFields(props: any) {
-              const t: any = {};
-              for (const i in props) {
-                if (props.hasOwnProperty(i) && i !== 'children') {
-                  t[i] = FormAntd.createFormField({ ...props[i] });
-                }
-              }
-              return t;
-            },
-            onValuesChange(_: any, values: any) {
-              // console.log(values);
+      {
+        // ...that.state.fields.username
+      },
+      {
+        onSubmit(values: any) {
+          console.table(values);
+        }
+      },
+      {
+        name: 'global_state',
+        onFieldsChange(props: any, changedFields: any) {
+          (props as any).onChange(changedFields);
+        },
+        mapPropsToFields(props: any) {
+          const t: any = {};
+          for (const i in props) {
+            if (props.hasOwnProperty(i) && i !== 'children') {
+              t[i] = FormAntd.createFormField({ ...props[i] });
             }
           }
-        ];
-      })()
+          return t;
+        },
+        onValuesChange(_: any, values: any) {
+          // console.log(values);
+        }
+      }
     );
   }
 
@@ -158,14 +145,9 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
   }
 
   handleFormChange = (changedFields: any) => {
-    this.setState(
-      (state: any) => ({
-        fields: { ...state.fields, ...changedFields }
-      }),
-      () => {
-        console.log(this.state);
-      }
-    );
+    this.setState((state: any) => ({
+      fields: { ...state.fields, ...changedFields }
+    }));
   };
 
   render() {
@@ -175,16 +157,20 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
         {time.format('YYYY-MM-DD HH:mm:ss')}
         <this.Form {...fields} onChange={this.handleFormChange}>
           <Input name="username" label="牛逼" />
-          <Login
-            name="password"
-            type="password"
-            rules={[
-              {
-                // validator
-              }
-            ]}
-          />
-          {/* <FormItem
+          <div>
+            <div>
+              <Login
+                name="password"
+                type="password"
+                rules={[
+                  {
+                    // validator
+                  }
+                ]}
+              />
+            </div>
+          </div>
+          <FormItem
             label="test"
             style={{
               textAlign: 'left'
@@ -230,8 +216,8 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 />
               </FormItem>
             </div>
-          </FormItem> */}
-          {/* <h2>hey</h2>
+          </FormItem>
+          <h2>hey</h2>
           {({ form: { getFieldDecorator } }: FormComponentProps) => (
             <FormAntd.Item label={'自定义组件'}>
               {getFieldDecorator('uu', {
@@ -244,7 +230,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <DatePicker name="date" type="RangePicker" label="日期" />
           <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} />
           <Input name="emaild" type="email" label="牛逼" />
-          <Submit name="submit" /> */}
+          <Submit name="submit" />
         </this.Form>
       </div>
     );
