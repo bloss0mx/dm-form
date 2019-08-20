@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form } from 'antd';
 import { FormComponentProps } from 'antd/es/form';
-import { content, FormProps, value } from './formChildrenDealer';
+import { content, FormProps } from './formChildrenDealer';
 
 interface anyThing {
   label: string;

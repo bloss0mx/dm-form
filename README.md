@@ -42,3 +42,9 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## NOTICE
+
+现在已知的“问题”：
+
+1. 如果使用了 rules，会触发 onchange 两次，但是 mapPropsToFields 只触发一次（thankfully）

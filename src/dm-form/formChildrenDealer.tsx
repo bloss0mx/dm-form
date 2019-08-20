@@ -7,48 +7,53 @@ export interface FormItemProps {}
 
 function injectProps<T>(
   children: React.ReactElement,
-  form: FormComponentProps
-) {
-  let _children = (children as React.ReactElement).props.children;
+  formComponentProps: FormComponentProps,
+  key: number
+): React.ReactElement {
+  const _children = children.props.children;
   return React.cloneElement(
     children,
     {
-      form: form.form
+      key,
+      form: formComponentProps.form
     },
-    _children ? content({ form: form.form, children: _children }) : undefined
+    _children
+      ? content({ form: formComponentProps.form, children: _children })
+      : undefined
   );
 }
 
 export function content<T, P>(
   props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
-): React.ReactElement | React.ReactNodeArray {
+): React.ReactElement | React.ReactNodeArray | undefined {
   const { children } = props;
-
   if (children && children.constructor === Array) {
     // 此处有点问题，暂时先断言成dmform组件
     return (children as Array<
-      ((p: FormComponentProps) => React.ReactNode) | React.ReactNode
+      ((p: FormComponentProps) => React.ReactElement) | React.ReactElement
     >).map((item, index) => {
       if (typeof item === 'function') {
         const { children, ..._props } = props as (FormComponentProps &
           React.PropsWithChildren<P>);
-        return funcCompDealer(_props, item as (
-          props: FormComponentProps
-        ) => React.ReactNode);
-        // throw new Error('NOT support function form component now!');
+        return funcCompDealer(
+          _props,
+          item as (props: FormComponentProps) => React.ReactElement,
+          index
+        );
       } else {
         if (React.isValidElement(item)) {
-          return injectProps(item, props);
+          return injectProps(item, props, index);
         } else {
           return item;
         }
       }
     });
   } else if (React.isValidElement(children)) {
-    return injectProps(children, props);
+    return injectProps(children, props, 0);
   } else {
-    if (typeof children === 'string') return children as any;
-    throw new Error('Unknow type of children! ');
+    if (children === undefined) return;
+    else if (typeof children === 'string') return children as any;
+    throw new Error(`Unknow type of children! ${children}`);
   }
 }
 
@@ -62,7 +67,8 @@ function isDOMElement(element: any) {
 
 function funcCompDealer(
   formProps: FormComponentProps,
-  selfDefinedComponent: (props: FormComponentProps) => React.ReactNode
-) {
-  return selfDefinedComponent(formProps);
+  selfDefinedComponent: (props: FormComponentProps) => React.ReactElement,
+  key: number
+): React.ReactElement {
+  return React.cloneElement(selfDefinedComponent({ ...formProps }), { key });
 }

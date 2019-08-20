@@ -34,7 +34,7 @@ export default function Login(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError, isFieldTouched, getFieldValue }
+    form: { getFieldDecorator, getFieldError, isFieldTouched }
   } = (props as any) as FormComponentProps;
   const { name, placeholder, children, rules, type, label, message } = props;
 

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Form,
-  Icon,
-  Input as InputAntd,
-  DatePicker as DatePickerAntd
-} from 'antd';
+import { Form, DatePicker as DatePickerAntd } from 'antd';
 import { FormComponentProps } from 'antd/es/form';
 import { FormItemProps } from './formChildrenDealer';
 
@@ -44,7 +39,7 @@ export default function Input(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError, getFieldValue }
+    form: { getFieldDecorator, getFieldError }
   } = (props as any) as FormComponentProps;
   const {
     name,
