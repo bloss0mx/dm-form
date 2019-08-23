@@ -1,15 +1,22 @@
 import React from 'react';
-import { Form as FormAntd, Input as InputAntd } from 'antd';
+import {
+  Form as FormAntd,
+  Input as InputAntd,
+  Select as SelectAntd
+} from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
 
 import Login from './Login';
 import Input from './Input';
-import DmForm from './DmForm';
+import DmForm, { fieldIniter } from './DmForm';
 import Submit from './Submit';
 import CheckBox from './CheckBox';
 import FormItem from './FormItem';
 import DatePicker from './DatePicker';
+import Select, { Option } from './Select';
+import Radio from './Radio';
+import AutoBind from './AutoBind';
 
 const validator = (rule: object, value: string, callback: Function) => {
   if (value.match(/\s/g)) callback('空字符无效');
@@ -24,7 +31,11 @@ const validator = (rule: object, value: string, callback: Function) => {
 };
 
 ///////////////////////////////////////////////////////////
-
+type s = ['username', 'password'];
+type Name<T> = { [P in keyof T]: T[P] }[keyof T];
+type ss = {
+  field: { [T in keyof ['username', 'password']]: ['username', 'password'][T] };
+};
 type state = {
   time: Moment;
   fields: {
@@ -50,7 +61,7 @@ type state = {
       value: string;
     };
     qewr: {
-      value: string;
+      value: boolean;
     };
     email: {
       value: string;
@@ -62,53 +73,46 @@ type state = {
     uu: {
       value: string;
     };
+    select: {
+      value: string;
+    };
+    vihcle: {
+      value: string;
+    };
+    auto: {
+      value: string;
+    };
   };
 };
 
-export default class HorizontalLoginForm extends React.Component<any, state> {
-  protected Form: any;
+export default class HorizontalLoginForm extends React.Component<{}, state> {
+  Form: any;
 
   constructor(props: any) {
     super(props);
     this.state = {
       time: moment(),
-      fields: {
-        username: {
-          value: 'niubiguai'
-        },
-        password: {
-          value: '123456'
-        },
-        ayeaye: {
-          value: '12'
-        },
-        nyeney: {
-          value: '23'
-        },
-        ayeayehao: {
-          value: 'asdf'
-        },
-        test: {
-          value: 'qwer'
-        },
-        tedst: {
-          value: 'zxcv'
-        },
-        qewr: {
-          value: 'fdsa'
-        },
-        email: {
-          value: 'rewq'
-        },
-        date: { value: [moment().startOf('day'), moment().endOf('day')] },
-        emaild: {
-          value: 'niubi@163.com'
-        },
-        uu: {
-          value: 'niubi'
-        }
-      }
-    } as state;
+      fields: fieldIniter({
+        username: 'niubiguai',
+        password: '123456',
+        ayeaye: '12',
+        nyeney: '23',
+        ayeayehao: 'asdf',
+        test: 'qwer',
+        tedst: 'zxcv',
+        qewr: true,
+        email: 'rewq',
+        date: [moment().startOf('day'), moment().endOf('day')] as [
+          Moment,
+          Moment
+        ],
+        emaild: 'niubi@163.com',
+        uu: 'niubi',
+        select: 'aye',
+        vihcle: '',
+        auto: 'yo'
+      })
+    };
 
     this.Form = DmForm(
       {
@@ -229,7 +233,57 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <Login name="tedst" type="username" />
           <DatePicker name="date" type="RangePicker" label="日期" />
           <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} />
-          <Input name="emaild" type="email" label="牛逼" />
+          <Input name="emaild" type="email" label="牛逼yo" />
+          <Select name="select" label="选择器">
+            <Option value="aye">aye</Option>
+            <Option value="nye">nye</Option>
+          </Select>
+          <Radio
+            label="坐骑"
+            name="vihcle"
+            options={[
+              { name: '灰机', value: 'airplane' },
+              { name: '火箭', value: 'rocket' }
+            ]}
+          />
+          {this.state.fields.select.value === 'aye' && (
+            <Login name="tedst" type="username" />
+          )}
+          <AutoBind
+            name="auto"
+            label="auto"
+            rules={[{ required: true, message: '需要输入这个' }]}
+            component={
+              <Input
+                name="youi"
+                addonBefore={
+                  <Select
+                    name="youiiiiii"
+                    style={{
+                      width: '35px',
+                      lineHeight: '32px',
+                      height: '32px',
+                      marginBottom: 0,
+                      margin: '-1px',
+                      transform: 'translateY(-5px)'
+                    }}
+                  >
+                    <Option value="aye">aye</Option>
+                    <Option value="nye">nye</Option>
+                  </Select>
+                }
+              />
+            }
+            // component={({
+            //   form: { getFieldDecorator }
+            // }: FormComponentProps) => (
+            //   <FormAntd.Item label={'自定义组件'}>
+            //     {getFieldDecorator('uu', {
+            //       rules: [{ required: true, message: 'Username is required!' }]
+            //     })(<InputAntd />)}
+            //   </FormAntd.Item>
+            // )}
+          />
           <Submit name="submit" />
         </this.Form>
       </div>

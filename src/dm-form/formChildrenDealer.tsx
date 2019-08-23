@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { isValidElement } from 'react';
 import { FormComponentProps } from 'antd/es/form';
 
 export type value = any;
@@ -26,7 +26,13 @@ function injectProps<T>(
 export function content<T, P>(
   props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
 ): React.ReactElement | React.ReactNodeArray | undefined {
-  const { children } = props;
+  const { children, ...other } = props;
+  // console.log(Object.keys(other));
+  // for (const x of Object.keys(other)) {
+  //   if (isValidElement((other as any)[x])) {
+  //     console.log('>>>', (other as any)[x], x);
+  //   }
+  // }
   if (children && children.constructor === Array) {
     // 此处有点问题，暂时先断言成dmform组件
     return (children as Array<
@@ -71,4 +77,31 @@ function funcCompDealer(
   key: number
 ): React.ReactElement {
   return React.cloneElement(selfDefinedComponent({ ...formProps }), { key });
+}
+
+export function componentFormBind(
+  component: React.ReactElement,
+  form: FormComponentProps
+) {
+  console.log(component);
+  const keys = Object.keys(component.props);
+  const newProps = {} as any;
+
+  for (const key of keys) {
+    console.log(key, React.isValidElement(component.props[key]));
+    if (React.isValidElement(component.props[key])) {
+      newProps[key] = componentFormBind(component.props[key], form);
+    } else if (typeof component.props[key] === 'function') {
+      funcCompDealer(
+        form,
+        component.props[key] as (
+          props: FormComponentProps
+        ) => React.ReactElement,
+        0
+      );
+    }
+  }
+
+  newProps.form = form;
+  return React.cloneElement(component, newProps);
 }

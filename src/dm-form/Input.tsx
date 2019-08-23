@@ -26,6 +26,8 @@ interface anyThing {
   type?: 'email';
   rules?: Array<Object>;
   style?: React.CSSProperties;
+  prefix?: React.ReactElement;
+  addonBefore?: React.ReactElement;
   [name: string]: any;
 }
 
@@ -36,14 +38,24 @@ export default function Input(props: anyThing & FormItemProps) {
   const {
     form: { getFieldDecorator, getFieldError }
   } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, type, label } = props;
+  const {
+    name,
+    placeholder,
+    children,
+    rules,
+    type,
+    label,
+    style,
+    prefix,
+    addonBefore
+  } = props;
 
   return (
     <Form.Item
       label={label}
       validateStatus={getFieldError(name) ? 'error' : ''}
       help={getFieldError(name) || ''}
-      style={props.style}
+      style={style}
     >
       {getFieldDecorator(name, {
         rules: (type && TYPE_DATA[type].rules) || rules
@@ -51,7 +63,12 @@ export default function Input(props: anyThing & FormItemProps) {
         children !== undefined ? (
           children
         ) : (
-          <InputAntd type="text" placeholder={placeholder || ''} />
+          <InputAntd
+            type="text"
+            placeholder={placeholder || ''}
+            prefix={prefix}
+            addonBefore={addonBefore}
+          />
         )
       )}
     </Form.Item>
