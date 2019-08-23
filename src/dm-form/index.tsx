@@ -149,21 +149,32 @@ export default class HorizontalLoginForm extends React.Component<{}, state> {
   }
 
   handleFormChange = (changedFields: any) => {
-    this.setState((state: any) => ({
-      fields: { ...state.fields, ...changedFields }
-    }));
+    this.setState(
+      (state: any) => ({
+        fields: { ...state.fields, ...changedFields }
+      }),
+      () => {
+        console.table(this.state.fields);
+      }
+    );
   };
 
   render() {
     const { time, fields } = this.state;
+
     return (
       <div style={{ width: '500px' }}>
         {time.format('YYYY-MM-DD HH:mm:ss')}
         <this.Form {...fields} onChange={this.handleFormChange}>
-          <Input name="username" label="牛逼" />
+          <div>
+            <Input name="username" label="牛逼" />
+            <Login name="tedst" label="吹大了" type="username" />
+          </div>
+
           <div>
             <div>
               <Login
+                label="密码"
                 name="password"
                 type="password"
                 rules={[
@@ -222,14 +233,14 @@ export default class HorizontalLoginForm extends React.Component<{}, state> {
             </div>
           </FormItem>
           <h2>hey</h2>
-          {({ form: { getFieldDecorator } }: FormComponentProps) => (
+          {/* {({ form: { getFieldDecorator } }: FormComponentProps) => (
             <FormAntd.Item label={'自定义组件'}>
               {getFieldDecorator('uu', {
                 rules: [{ required: true, message: 'Username is required!' }]
               })(<InputAntd />)}
             </FormAntd.Item>
-          )}
-          <Login name="test" type="username" />
+          )} */}
+          {/* <Login name="test" type="username" />
           <Login name="tedst" type="username" />
           <DatePicker name="date" type="RangePicker" label="日期" />
           <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} />
@@ -245,11 +256,11 @@ export default class HorizontalLoginForm extends React.Component<{}, state> {
               { name: '灰机', value: 'airplane' },
               { name: '火箭', value: 'rocket' }
             ]}
-          />
-          {this.state.fields.select.value === 'aye' && (
+          /> */}
+          {/* {this.state.fields.select.value === 'aye' && (
             <Login name="tedst" type="username" />
-          )}
-          <AutoBind
+          )} */}
+          {/* <AutoBind
             name="auto"
             label="auto"
             rules={[{ required: true, message: '需要输入这个' }]}
@@ -283,7 +294,7 @@ export default class HorizontalLoginForm extends React.Component<{}, state> {
             //     })(<InputAntd />)}
             //   </FormAntd.Item>
             // )}
-          />
+          /> */}
           <Submit name="submit" />
         </this.Form>
       </div>

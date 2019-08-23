@@ -39,29 +39,31 @@ export default function Login(props: anyThing & FormItemProps) {
   const { name, placeholder, children, rules, type, label, message } = props;
 
   return (
-    <Form.Item
-      label={label ? label : type && TYPE_DATA[type] && TYPE_DATA[type].label}
-      validateStatus={
-        isFieldTouched(name) && getFieldError(name) ? 'error' : ''
-      }
-      help={(isFieldTouched(name) && getFieldError(name)) || ''}
-    >
-      {getFieldDecorator(name, {
-        rules: [
-          { required: true, message: message || TYPE_DATA[type].message },
-          ...((rules && rules) || [])
-        ]
-      })(
-        children !== undefined ? (
-          children
-        ) : (
-          <Input
-            type={TYPE_DATA[type].type}
-            prefix={TYPE_DATA[type].prefix}
-            placeholder={placeholder || ''}
-          />
-        )
-      )}
-    </Form.Item>
+    // <Form.Item
+    //   label={label ? label : type && TYPE_DATA[type] && TYPE_DATA[type].label}
+    //   validateStatus={
+    //     isFieldTouched(name) && getFieldError(name) ? 'error' : ''
+    //   }
+    //   help={(isFieldTouched(name) && getFieldError(name)) || ''}
+    // >
+    //   {
+    getFieldDecorator(name, {
+      rules: [
+        { required: true, message: message || TYPE_DATA[type].message },
+        ...((rules && rules) || [])
+      ]
+    })(
+      children !== undefined ? (
+        children
+      ) : (
+        <Input
+          type={TYPE_DATA[type].type}
+          prefix={TYPE_DATA[type].prefix}
+          placeholder={placeholder || ''}
+        />
+      )
+    ) as React.ReactElement
+    //   }
+    // </Form.Item>
   );
 }

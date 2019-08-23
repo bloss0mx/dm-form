@@ -32,15 +32,17 @@ export default function Input(props: anyThing & FormItemProps) {
   // });
 
   return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={style}
-    >
-      {getFieldDecorator(name, {
+    // <Form.Item
+    //   label={label}
+    //   validateStatus={getFieldError(name) ? 'error' : ''}
+    //   help={getFieldError(name) || ''}
+    //   style={style}
+    // >
+      // {
+        getFieldDecorator(name, {
         rules: rules
-      })(componentFormBind(component, props.form))}
-    </Form.Item>
+      })(componentFormBind(component, props.form)) as React.ReactElement
+      // }
+    // </Form.Item>
   );
 }

@@ -1,66 +1,120 @@
-import React, { isValidElement } from 'react';
+import React, { isValidElement, PropsWithChildren } from 'react';
 import { FormComponentProps } from 'antd/es/form';
+import { FormItemProps } from 'antd/es/form/FormItem';
+import { Form, Icon, Input as InputAntd } from 'antd';
+import Input from './Input';
 
 export type value = any;
 export interface FormProps<T> {}
-export interface FormItemProps {}
+export type FormItemProps = FormItemProps;
 
 function injectProps<T>(
-  children: React.ReactElement,
+  _children: React.ReactElement,
   formComponentProps: FormComponentProps,
   key: number
 ): React.ReactElement {
-  const _children = children.props.children;
+  const { children } = _children.props;
+
   return React.cloneElement(
-    children,
+    _children,
     {
       key,
       form: formComponentProps.form
     },
-    _children
-      ? content({ form: formComponentProps.form, children: _children })
-      : undefined
+    children ? content({ form: formComponentProps.form, children }) : undefined
   );
 }
 
 export function content<T, P>(
-  props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
+  props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P> | any
 ): React.ReactElement | React.ReactNodeArray | undefined {
-  const { children, ...other } = props;
-  // console.log(Object.keys(other));
-  // for (const x of Object.keys(other)) {
-  //   if (isValidElement((other as any)[x])) {
-  //     console.log('>>>', (other as any)[x], x);
-  //   }
-  // }
-  if (children && children.constructor === Array) {
+  const { children, form, ...other } = props;
+
+  // form组件函数
+  if (typeof children === 'function') {
+    return (
+      <Form.Item {...propsDealer({ ...other, form })}>
+        {funcCompDealer(
+          other,
+          children as (props: FormComponentProps) => React.ReactElement,
+          0
+        )}
+      </Form.Item>
+    );
+  }
+  // 数组
+  else if (children && children.constructor === Array) {
     // 此处有点问题，暂时先断言成dmform组件
     return (children as Array<
       ((p: FormComponentProps) => React.ReactElement) | React.ReactElement
     >).map((item, index) => {
+      const { children, ..._props } = props as (FormComponentProps &
+        React.PropsWithChildren<P>);
+      // form组件函数
       if (typeof item === 'function') {
-        const { children, ..._props } = props as (FormComponentProps &
-          React.PropsWithChildren<P>);
-        return funcCompDealer(
-          _props,
-          item as (props: FormComponentProps) => React.ReactElement,
-          index
+        return (
+          <Form.Item {...propsDealer({ ...(_props as any), form })}>
+            {funcCompDealer(
+              _props,
+              item as (props: FormComponentProps) => React.ReactElement,
+              index
+            )}
+          </Form.Item>
         );
-      } else {
-        if (React.isValidElement(item)) {
+      }
+      // React.ReactNode子节点
+      else {
+        // 原生节点
+        if (isDOMElement(item)) {
           return injectProps(item, props, index);
-        } else {
+        }
+        // 有效子节点
+        else if (React.isValidElement(item)) {
+          return (
+            <Form.Item {...propsDealer({ ...(item as any).props, form })}>
+              {injectProps(item, props, index)}
+            </Form.Item>
+          );
+        }
+        // 其他类型
+        else {
           return item;
         }
       }
     });
-  } else if (React.isValidElement(children)) {
+  } else if (isDOMElement(children)) {
     return injectProps(children, props, 0);
-  } else {
+  }
+  // 单个有效子节点
+  else if (React.isValidElement(children)) {
+    return (
+      <Form.Item {...propsDealer({ ...props.children.props, form })}>
+        {injectProps(children, props, 0)}
+      </Form.Item>
+    );
+  }
+  // 其他类型
+  else {
     if (children === undefined) return;
     else if (typeof children === 'string') return children as any;
     throw new Error(`Unknow type of children! ${children}`);
   }
+}
+
+function propsDealer<P>(
+  props: FormComponentProps & React.PropsWithChildren<P> & { name: string }
+) {
+  const {
+    name,
+    form: { getFieldError, isFieldTouched },
+    children
+  } = props;
+  return {
+    name,
+    ...props,
+    validateStatus: isFieldTouched(name) && getFieldError(name) ? 'error' : '',
+    help: (isFieldTouched(name) && getFieldError(name)) || ''
+  };
 }
 
 /**
@@ -83,20 +137,17 @@ export function componentFormBind(
   component: React.ReactElement,
   form: FormComponentProps
 ) {
-  console.log(component);
-  const keys = Object.keys(component.props);
+  const { props } = component;
+  const keys = Object.keys(props);
   const newProps = {} as any;
 
   for (const key of keys) {
-    console.log(key, React.isValidElement(component.props[key]));
-    if (React.isValidElement(component.props[key])) {
-      newProps[key] = componentFormBind(component.props[key], form);
-    } else if (typeof component.props[key] === 'function') {
+    if (React.isValidElement(props[key])) {
+      newProps[key] = componentFormBind(props[key], form);
+    } else if (typeof props[key] === 'function') {
       funcCompDealer(
         form,
-        component.props[key] as (
-          props: FormComponentProps
-        ) => React.ReactElement,
+        props[key] as (props: FormComponentProps) => React.ReactElement,
         0
       );
     }

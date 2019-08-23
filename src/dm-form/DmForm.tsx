@@ -77,7 +77,7 @@ export const fieldIniter: fieldIniter = state => {
   return _state;
 };
 
-type states = { [x: string]: { value: any } };
+// type states = { [x: string]: { value: any } };
 // type transBack = <P>(field: states) => { [T in Name<P>]: (typeof P[T]).value };
 
 // export const transBackToState: transBack = state => {

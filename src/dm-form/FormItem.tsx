@@ -15,14 +15,17 @@ export default function FormItem<T, P>(
     React.PropsWithChildren<P> &
     anyThing
 ) {
+  console.log(props);
   return (
-    <Form.Item label={props.label} style={props.style}>
-      {content({
-        ...(props as FormProps<T> &
-          FormComponentProps &
-          React.PropsWithChildren<P> &
-          anyThing)
-      })}
-    </Form.Item>
+    // <Form.Item label={props.label} style={props.style}>
+    // {
+    content({
+      ...(props as FormProps<T> &
+        FormComponentProps &
+        React.PropsWithChildren<P> &
+        anyThing)
+    }) as React.ReactElement
+    // }
+    // </Form.Item>
   );
 }

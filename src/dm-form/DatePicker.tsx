@@ -53,21 +53,23 @@ export default function Input(props: anyThing & FormItemProps) {
   const DatePicker = (DatePickerAntd as any)[type];
 
   return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={props.style}
-    >
-      {getFieldDecorator(name, {
-        rules: (type && TYPE_DATA[type].rules) || rules
-      })(
-        children !== undefined ? (
-          children
-        ) : (
-          <DatePicker placeholder={placeholder || ''} />
-        )
-      )}
-    </Form.Item>
+    // <Form.Item
+    //   label={label}
+    //   validateStatus={getFieldError(name) ? 'error' : ''}
+    //   help={getFieldError(name) || ''}
+    //   style={props.style}
+    // >
+    //   {
+    getFieldDecorator(name, {
+      rules: (type && TYPE_DATA[type].rules) || rules
+    })(
+      children !== undefined ? (
+        children
+      ) : (
+        <DatePicker placeholder={placeholder || ''} />
+      )
+    ) as React.ReactElement
+    // }
+    // </Form.Item>
   );
 }

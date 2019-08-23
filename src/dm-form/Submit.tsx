@@ -24,14 +24,14 @@ export default function Submit(props: anyThing & FormProps) {
   }
 
   return (
-    <Form.Item key={props.name}>
-      <Button
-        type={props.type || 'primary'}
-        htmlType="submit"
-        disabled={hasErrors(getFieldsError())}
-      >
-        Log in
-      </Button>
-    </Form.Item>
+    // <Form.Item key={props.name}>
+    <Button
+      type={props.type || 'primary'}
+      htmlType="submit"
+      disabled={hasErrors(getFieldsError())}
+    >
+      Log in
+    </Button>
+    // </Form.Item>
   );
 }

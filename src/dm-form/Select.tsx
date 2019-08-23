@@ -22,17 +22,19 @@ export default function Checkbox(props: anyThing & FormItemProps) {
   const { name, rules, label, extra, children, style } = props;
 
   return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={style}
-    >
-      {getFieldDecorator(name, {
-        rules
-      })(<SelectAntd>{children}</SelectAntd>)}
-      {extra}
-    </Form.Item>
+    // <Form.Item
+    //   label={label}
+    //   validateStatus={getFieldError(name) ? 'error' : ''}
+    //   help={getFieldError(name) || ''}
+    //   style={style}
+    // >
+    //   {
+    getFieldDecorator(name, {
+      rules
+    })(<SelectAntd>{children}</SelectAntd>) as any
+    // }
+    //   {extra}
+    // </Form.Item>
   );
 }
 

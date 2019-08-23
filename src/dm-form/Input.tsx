@@ -50,27 +50,38 @@ export default function Input(props: anyThing & FormItemProps) {
     addonBefore
   } = props;
 
-  return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={style}
-    >
-      {getFieldDecorator(name, {
-        rules: (type && TYPE_DATA[type].rules) || rules
-      })(
-        children !== undefined ? (
-          children
-        ) : (
-          <InputAntd
-            type="text"
-            placeholder={placeholder || ''}
-            prefix={prefix}
-            addonBefore={addonBefore}
-          />
-        )
-      )}
-    </Form.Item>
-  );
+  return getFieldDecorator(name, {
+    rules: (type && TYPE_DATA[type].rules) || rules
+  })(
+    <InputAntd
+      type="text"
+      placeholder={placeholder || ''}
+      prefix={prefix}
+      addonBefore={addonBefore}
+    />
+  ) as React.ReactElement;
+
+  // return (
+  //   <Form.Item
+  //     label={label}
+  //     validateStatus={getFieldError(name) ? 'error' : ''}
+  //     help={getFieldError(name) || ''}
+  //     style={style}
+  //   >
+  //     {getFieldDecorator(name, {
+  //       rules: (type && TYPE_DATA[type].rules) || rules
+  //     })(
+  //       children !== undefined ? (
+  //         children
+  //       ) : (
+  //         <InputAntd
+  //           type="text"
+  //           placeholder={placeholder || ''}
+  //           prefix={prefix}
+  //           addonBefore={addonBefore}
+  //         />
+  //       )
+  //     )}
+  //   </Form.Item>
+  // );
 }
