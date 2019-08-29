@@ -1,8 +1,38 @@
-import React, { isValidElement, PropsWithChildren } from 'react';
-import { FormComponentProps } from 'antd/es/form';
-import { FormItemProps } from 'antd/es/form/FormItem';
-import { Form, Icon, Input as InputAntd } from 'antd';
-import Input from './Input';
+import React, { isValidElement, PropsWithChildren } from "react";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "antd/es/form/FormItem";
+import { Form, Icon, Input as InputAntd } from "antd";
+import Input from "./Input";
+
+import Login from "./Login";
+// import Input from "./Input";
+import DmForm, { fieldIniter } from "./DmForm";
+import CheckBox from "./CheckBox";
+import FormItem from "./FormItem";
+import DatePicker from "./DatePicker";
+import Submit from "./Submit";
+import Select, { Option } from "./Select";
+import Radio from "./Radio";
+import AutoBind from "./AutoBind";
+
+const isDmForm = (test: any) => {
+  const found = [
+    Input,
+    DmForm,
+    fieldIniter,
+    Login,
+    Submit,
+    CheckBox,
+    FormItem,
+    DatePicker,
+    Select,
+    Option,
+    Radio,
+    AutoBind
+  ].find(item => item === test);
+
+  return !!found;
+};
 
 export type value = any;
 export interface FormProps<T> {}
@@ -14,7 +44,7 @@ function injectProps<T>(
   key: number
 ): React.ReactElement {
   const { children } = _children.props;
-
+  // console.log("222a", _children, children);
   return React.cloneElement(
     _children,
     {
@@ -29,9 +59,19 @@ export function content<T, P>(
   props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P> | any
 ): React.ReactElement | React.ReactNodeArray | undefined {
   const { children, form, ...other } = props;
-
+  // console.error("222a", children);
+  if (
+    (children && children.type === Form) ||
+    (children && children.type === Form.Item)
+  ) {
+    // console.error("222a", "error");
+    return children;
+  } else if (children && children.type === FormItem) {
+    // console.error("hey!", children);
+    return injectProps(children, { form: props.form }, 0);
+  }
   // form组件函数
-  if (typeof children === 'function') {
+  else if (typeof children === "function") {
     return (
       <Form.Item {...propsDealer({ ...other, form })}>
         {funcCompDealer(
@@ -51,7 +91,16 @@ export function content<T, P>(
       const { children, ..._props } = props as (FormComponentProps &
         React.PropsWithChildren<P>);
       // form组件函数
-      if (typeof item === 'function') {
+      if (
+        ((item as any).type && (item as any).type === Form) ||
+        ((item as any).type && (item as any).type === Form.Item)
+      ) {
+        // console.error("222a", "error");
+        return item;
+      } else if ((item as any).type && (item as any).type === FormItem) {
+        // console.error("hey!");
+        return injectProps(item as any, { form: props.form }, index);
+      } else if (typeof item === "function") {
         return (
           <Form.Item {...propsDealer({ ...(_props as any), form })}>
             {funcCompDealer(
@@ -66,13 +115,14 @@ export function content<T, P>(
       else {
         // 原生节点
         if (isDOMElement(item)) {
-          return injectProps(item, props, index);
+          // console.warn(item);
+          return injectProps(item, { form: props.form }, index);
         }
         // 有效子节点
         else if (React.isValidElement(item)) {
           return (
             <Form.Item {...propsDealer({ ...(item as any).props, form })}>
-              {injectProps(item, props, index)}
+              {injectProps(item, { form: props.form }, index)}
             </Form.Item>
           );
         }
@@ -83,20 +133,24 @@ export function content<T, P>(
       }
     });
   } else if (isDOMElement(children)) {
-    return injectProps(children, props, 0);
+    // console.warn(children);
+    return injectProps(children, { form: props.form }, 0);
   }
   // 单个有效子节点
   else if (React.isValidElement(children)) {
+    // if ((children.props as any).label === 'test')
+    // console.warn("isvalid", children, props);
+    // console.warn(children);
     return (
       <Form.Item {...propsDealer({ ...props.children.props, form })}>
-        {injectProps(children, props, 0)}
+        {injectProps(children, { form: props.form }, 0)}
       </Form.Item>
     );
   }
   // 其他类型
   else {
     if (children === undefined) return;
-    else if (typeof children === 'string') return children as any;
+    else if (typeof children === "string") return children as any;
     throw new Error(`Unknow type of children! ${children}`);
   }
 }
@@ -109,11 +163,12 @@ function propsDealer<P>(
     form: { getFieldError, isFieldTouched },
     children
   } = props;
+  // console.log(props);
   return {
     name,
     ...props,
-    validateStatus: isFieldTouched(name) && getFieldError(name) ? 'error' : '',
-    help: (isFieldTouched(name) && getFieldError(name)) || ''
+    validateStatus: isFieldTouched(name) && getFieldError(name) ? "error" : "",
+    help: (isFieldTouched(name) && getFieldError(name)) || ""
   };
 }
 
@@ -122,7 +177,7 @@ function propsDealer<P>(
  * @return {Boolean} whether it's a DOM element
  */
 function isDOMElement(element: any) {
-  return typeof element.type === 'string';
+  return element && typeof element.type === "string";
 }
 
 function funcCompDealer(
@@ -144,7 +199,7 @@ export function componentFormBind(
   for (const key of keys) {
     if (React.isValidElement(props[key])) {
       newProps[key] = componentFormBind(props[key], form);
-    } else if (typeof props[key] === 'function') {
+    } else if (typeof props[key] === "function") {
       funcCompDealer(
         form,
         props[key] as (props: FormComponentProps) => React.ReactElement,
