@@ -1,8 +1,8 @@
-import React, { isValidElement, PropsWithChildren } from 'react';
-import { FormComponentProps } from 'antd/es/form';
-import { FormItemProps } from 'antd/es/form/FormItem';
-import { Form, Icon, Input as InputAntd } from 'antd';
-import Input from './Input';
+import React, { isValidElement, PropsWithChildren } from "react";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "antd/es/form/FormItem";
+import { Form, Icon, Input as InputAntd } from "antd";
+import Input from "./Input";
 
 export type value = any;
 export interface FormProps<T> {}
@@ -31,7 +31,9 @@ export function content<T, P>(
   const { children, form, ...other } = props;
 
   // form组件函数
-  if (typeof children === 'function') {
+  if (children.type && children.type === Form.Item) {
+    return children;
+  } else if (typeof children === "function") {
     return (
       <Form.Item {...propsDealer({ ...other, form })}>
         {funcCompDealer(
@@ -51,7 +53,10 @@ export function content<T, P>(
       const { children, ..._props } = props as (FormComponentProps &
         React.PropsWithChildren<P>);
       // form组件函数
-      if (typeof item === 'function') {
+      if((item as any).type && (item as any).type === Form.Item){
+        return item;
+      }
+      if (typeof item === "function") {
         return (
           <Form.Item {...propsDealer({ ...(_props as any), form })}>
             {funcCompDealer(
@@ -96,7 +101,7 @@ export function content<T, P>(
   // 其他类型
   else {
     if (children === undefined) return;
-    else if (typeof children === 'string') return children as any;
+    else if (typeof children === "string") return children as any;
     throw new Error(`Unknow type of children! ${children}`);
   }
 }
@@ -112,8 +117,8 @@ function propsDealer<P>(
   return {
     name,
     ...props,
-    validateStatus: isFieldTouched(name) && getFieldError(name) ? 'error' : '',
-    help: (isFieldTouched(name) && getFieldError(name)) || ''
+    validateStatus: isFieldTouched(name) && getFieldError(name) ? "error" : "",
+    help: (isFieldTouched(name) && getFieldError(name)) || ""
   };
 }
 
@@ -122,7 +127,7 @@ function propsDealer<P>(
  * @return {Boolean} whether it's a DOM element
  */
 function isDOMElement(element: any) {
-  return typeof element.type === 'string';
+  return typeof element.type === "string";
 }
 
 function funcCompDealer(
@@ -144,7 +149,7 @@ export function componentFormBind(
   for (const key of keys) {
     if (React.isValidElement(props[key])) {
       newProps[key] = componentFormBind(props[key], form);
-    } else if (typeof props[key] === 'function') {
+    } else if (typeof props[key] === "function") {
       funcCompDealer(
         form,
         props[key] as (props: FormComponentProps) => React.ReactElement,
