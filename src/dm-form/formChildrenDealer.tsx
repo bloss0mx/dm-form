@@ -1,59 +1,105 @@
-import React from 'react';
-import { FormComponentProps } from 'antd/es/form';
+import React from "react";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "antd/es/form/FormItem";
+import { FormProps as FormPropsAntd } from "antd/es/form/Form";
+import { Form, Icon, Input as InputAntd } from "antd";
+import AutoBind from "./AutoBind";
+import FormItem from "./FormItem";
 
 export type value = any;
-export interface FormProps<T> {}
-export interface FormItemProps {}
+export interface FormProps<T> extends FormPropsAntd {}
+export type FormItemProps = FormItemProps;
 
 function injectProps<T>(
-  children: React.ReactElement,
-  formComponentProps: FormComponentProps,
+  _children: React.ReactElement,
+  form: FormComponentProps["form"],
   key: number
 ): React.ReactElement {
-  const _children = children.props.children;
+  const { children } = _children.props;
+
+  if (_children.type === Form.Item) {
+    return content({ form: form, children }) as React.ReactElement;
+  } else if (isDOMElement(_children)) {
+    return React.cloneElement(
+      _children,
+      {
+        key
+      },
+      children ? content({ form: form, children }) : undefined
+    );
+  }
   return React.cloneElement(
-    children,
+    _children,
     {
       key,
-      form: formComponentProps.form
+      form: form
     },
-    _children
-      ? content({ form: formComponentProps.form, children: _children })
-      : undefined
+    children ? content({ form: form, children }) : undefined
   );
+}
+
+function childrenDealer<T>(
+  children: React.ReactElement,
+  props: FormComponentProps & React.PropsWithChildren<T>,
+  index: number
+) {
+  const { form, ...other } = props;
+
+  // form组件函数
+  if (children && (children as React.ReactElement).type === Form.Item) {
+    return children;
+  }
+  // 函数节点
+  if (typeof children === "function") {
+    return funcCompDealer(
+      props,
+      children as (props: FormComponentProps) => React.ReactElement,
+      index
+    );
+  }
+  // 原生节点
+  if (isDOMElement(children)) {
+    // console.log(children);
+    return injectProps(children as React.ReactElement, form, index);
+  }
+  // AutoBind
+  if (
+    React.isValidElement(children) &&
+    (children as React.ReactElement).type === AutoBind
+  ) {
+    return (
+      <Form.Item
+        key={index}
+        {...propsDealer({ ...(children as React.ReactElement).props, form })}
+      >
+        {/* {injectProps(children, form, index)} */}
+        {(children as any).type({
+          ...(children as React.ReactElement).props,
+          form
+        })}
+      </Form.Item>
+    );
+  }
+  // 单个有效子节点
+  if (React.isValidElement(children)) {
+    return injectProps(children, form, index);
+  }
+  // 其他类型
+  return children;
 }
 
 export function content<T, P>(
   props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
-): React.ReactElement | React.ReactNodeArray | undefined {
+): React.ReactNodeArray | undefined | React.ReactNode {
   const { children } = props;
-  if (children && children.constructor === Array) {
-    // 此处有点问题，暂时先断言成dmform组件
-    return (children as Array<
-      ((p: FormComponentProps) => React.ReactElement) | React.ReactElement
-    >).map((item, index) => {
-      if (typeof item === 'function') {
-        const { children, ..._props } = props as (FormComponentProps &
-          React.PropsWithChildren<P>);
-        return funcCompDealer(
-          _props,
-          item as (props: FormComponentProps) => React.ReactElement,
-          index
-        );
-      } else {
-        if (React.isValidElement(item)) {
-          return injectProps(item, props, index);
-        } else {
-          return item;
-        }
-      }
-    });
-  } else if (React.isValidElement(children)) {
-    return injectProps(children, props, 0);
+  if (children === undefined) {
+    return;
+  } else if ((children as any).constructor === Array) {
+    return (children as Array<React.ReactElement>).map((item, index) =>
+      childrenDealer(item, props, index)
+    );
   } else {
-    if (children === undefined) return;
-    else if (typeof children === 'string') return children as any;
-    throw new Error(`Unknow type of children! ${children}`);
+    return childrenDealer(children as React.ReactElement, props, 0);
   }
 }
 
@@ -62,7 +108,7 @@ export function content<T, P>(
  * @return {Boolean} whether it's a DOM element
  */
 function isDOMElement(element: any) {
-  return typeof element.type === 'string';
+  return typeof element.type === "string";
 }
 
 function funcCompDealer(
@@ -71,4 +117,49 @@ function funcCompDealer(
   key: number
 ): React.ReactElement {
   return React.cloneElement(selfDefinedComponent({ ...formProps }), { key });
+}
+
+export function componentFormBind(
+  component: React.ReactElement,
+  form: FormComponentProps
+) {
+  const { props } = component;
+  const keys = Object.keys(props);
+  const newProps = {} as any;
+
+  for (const key of keys) {
+    if (React.isValidElement(props[key])) {
+      newProps[key] = componentFormBind(props[key], form);
+    } else if (typeof props[key] === "function") {
+      funcCompDealer(
+        form,
+        props[key] as (props: FormComponentProps) => React.ReactElement,
+        0
+      );
+    }
+  }
+
+  newProps.form = form;
+  return React.cloneElement(component, newProps);
+}
+
+function propsDealer<T, P>(
+  props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
+) {
+  const {
+    name,
+    form: { getFieldError, isFieldTouched }
+  } = props;
+
+  if (name !== undefined) {
+    return {
+      ...props,
+      validateStatus:
+        isFieldTouched(name) && getFieldError(name) ? "error" : "",
+      help: (isFieldTouched(name) && getFieldError(name)) || ""
+    };
+  }
+  return {
+    ...props
+  };
 }

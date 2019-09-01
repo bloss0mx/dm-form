@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { Form } from 'antd';
-import { FormComponentProps, FormCreateOption } from 'antd/es/form';
-import { content } from './formChildrenDealer';
-import { FormProps, value } from './formChildrenDealer';
+import React, { useEffect } from "react";
+import { Form } from "antd";
+import { FormComponentProps, FormCreateOption } from "antd/es/form";
+import { content } from "./formChildrenDealer";
+import { FormProps, value } from "./formChildrenDealer";
 
 interface FormOnly<T> {
   onSubmit: (values: T) => value;
@@ -57,3 +57,22 @@ export default function DmFormFactory<T>(
 
   return Form.create(FormCreateOption)(DmForm);
 }
+
+type Name<T> = { [P in keyof T]: P }[keyof T];
+type fieldIniter = <P>(
+  field: P
+) => {
+  [T in Name<P>]: {
+    value: P[T];
+  };
+};
+
+export const fieldIniter: fieldIniter = state => {
+  const _state = {} as any;
+  for (const name in state) {
+    if ((state as Object).hasOwnProperty(name)) {
+      _state[name] = { value: state[name] };
+    }
+  }
+  return _state;
+};

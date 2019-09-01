@@ -1,12 +1,12 @@
-import React from 'react';
-import { Form } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
-import { content, FormProps } from './formChildrenDealer';
+import React from "react";
+import { Form } from "antd";
+import { FormComponentProps } from "antd/es/form";
+import { FormProps as FormPropsAntd } from "antd/es/form/Form";
+import { content, FormProps } from "./formChildrenDealer";
 
-interface anyThing {
+interface anyThing extends FormPropsAntd {
   label: string;
   style?: React.CSSProperties;
-  [name: string]: any;
 }
 
 export default function FormItem<T, P>(

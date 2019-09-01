@@ -1,26 +1,29 @@
-import React from 'react';
-import { Form as FormAntd, Input as InputAntd } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import moment, { Moment } from 'moment';
+import React from "react";
+import { Form as FormAntd, Input as InputAntd } from "antd";
+import { FormComponentProps } from "antd/lib/form";
+import moment, { Moment } from "moment";
 
-import Login from './Login';
-import Input from './Input';
-import DmForm from './DmForm';
-import Submit from './Submit';
-import CheckBox from './CheckBox';
-import FormItem from './FormItem';
-import DatePicker from './DatePicker';
+import Login from "./Login";
+import Input from "./Input";
+import DmForm, { fieldIniter } from "./DmForm";
+import Submit from "./Submit";
+import CheckBox from "./CheckBox";
+import FormItem from "./FormItem";
+import DatePicker from "./DatePicker";
+import AutoBind from "./AutoBind";
+import Select, { Option } from "./Select";
+import Radio from "./Radio";
 
 const validator = (rule: object, value: string, callback: Function) => {
-  if (value.match(/\s/g)) callback('空字符无效');
-  if (value.length < 6) callback('密码长度不能小于6个字符');
+  if (value.match(/\s/g)) callback("空字符无效");
+  if (value.length < 6) callback("密码长度不能小于6个字符");
   const d = value.match(/\d/g);
   const ll = value.match(/[a-z]/g);
   const gl = value.match(/[A-Z]/g);
-  const clear = value.replace(/[\d\sa-zA-Z]/g, '');
+  const clear = value.replace(/[\d\sa-zA-Z]/g, "");
   if (d && ll && gl && clear.length) {
     callback();
-  } else callback('密码需要包含大写字母、小写字母、数字、符号');
+  } else callback("密码需要包含大写字母、小写字母、数字、符号");
 };
 
 ///////////////////////////////////////////////////////////
@@ -50,7 +53,7 @@ type state = {
       value: string;
     };
     qewr: {
-      value: string;
+      value: boolean;
     };
     email: {
       value: string;
@@ -60,6 +63,15 @@ type state = {
       value: string;
     };
     uu: {
+      value: string;
+    };
+    select: {
+      value: string;
+    };
+    vihcle: {
+      value: string;
+    };
+    auto: {
       value: string;
     };
   };
@@ -72,42 +84,26 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
     super(props);
     this.state = {
       time: moment(),
-      fields: {
-        username: {
-          value: 'niubiguai'
-        },
-        password: {
-          value: '123456'
-        },
-        ayeaye: {
-          value: '12'
-        },
-        nyeney: {
-          value: '23'
-        },
-        ayeayehao: {
-          value: 'asdf'
-        },
-        test: {
-          value: 'qwer'
-        },
-        tedst: {
-          value: 'zxcv'
-        },
-        qewr: {
-          value: 'fdsa'
-        },
-        email: {
-          value: 'rewq'
-        },
-        date: { value: [moment().startOf('day'), moment().endOf('day')] },
-        emaild: {
-          value: 'niubi@163.com'
-        },
-        uu: {
-          value: 'niubi'
-        }
-      }
+      fields: fieldIniter({
+        username: "niubiguai",
+        password: "123456",
+        ayeaye: "12",
+        nyeney: "23",
+        ayeayehao: "asdf",
+        test: "qwer",
+        tedst: "zxcv",
+        qewr: true,
+        email: "rewq",
+        date: [moment().startOf("day"), moment().endOf("day")] as [
+          Moment,
+          Moment
+        ],
+        emaild: "niubi@163.com",
+        uu: "niubi",
+        select: "aye",
+        vihcle: "",
+        auto: "yo"
+      })
     } as state;
 
     this.Form = DmForm(
@@ -120,14 +116,14 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
         }
       },
       {
-        name: 'global_state',
+        name: "global_state",
         onFieldsChange(props: any, changedFields: any) {
           (props as any).onChange(changedFields);
         },
         mapPropsToFields(props: any) {
           const t: any = {};
           for (const i in props) {
-            if (props.hasOwnProperty(i) && i !== 'children') {
+            if (props.hasOwnProperty(i) && i !== "children") {
               t[i] = FormAntd.createFormField({ ...props[i] });
             }
           }
@@ -153,8 +149,8 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
   render() {
     const { time, fields } = this.state;
     return (
-      <div style={{ width: '500px' }}>
-        {time.format('YYYY-MM-DD HH:mm:ss')}
+      <div style={{ width: "500px" }}>
+        {time.format("YYYY-MM-DD HH:mm:ss")}
         <this.Form {...fields} onChange={this.handleFormChange}>
           <Input name="username" label="牛逼" />
           <div>
@@ -173,30 +169,30 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <FormItem
             label="test"
             style={{
-              textAlign: 'left'
+              textAlign: "left"
               // marginBottom: 0
             }}
           >
             <div
               style={{
-                border: '1px solid #ddd',
-                padding: '16px',
-                borderRadius: '4px',
-                backgroundColor: '#fafafa'
+                border: "1px solid #ddd",
+                padding: "16px",
+                borderRadius: "4px",
+                backgroundColor: "#fafafa"
               }}
             >
               <FormItem
                 label="test"
                 style={{
-                  textAlign: 'left',
+                  textAlign: "left",
                   marginBottom: 0
                 }}
               >
                 <Input
                   name="ayeaye"
                   style={{
-                    display: 'inline-block',
-                    width: '100px',
+                    display: "inline-block",
+                    width: "100px",
                     marginBottom: 0
                   }}
                 />
@@ -204,8 +200,8 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 <Input
                   name="nyeney"
                   style={{
-                    display: 'inline-block',
-                    width: '100px',
+                    display: "inline-block",
+                    width: "100px",
                     marginBottom: 0
                   }}
                 />
@@ -219,9 +215,9 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           </FormItem>
           <h2>hey</h2>
           {({ form: { getFieldDecorator } }: FormComponentProps) => (
-            <FormAntd.Item label={'自定义组件'}>
-              {getFieldDecorator('uu', {
-                rules: [{ required: true, message: 'Username is required!' }]
+            <FormAntd.Item label={"自定义组件"}>
+              {getFieldDecorator("uu", {
+                rules: [{ required: true, message: "Username is required!" }]
               })(<InputAntd />)}
             </FormAntd.Item>
           )}
@@ -230,6 +226,52 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <DatePicker name="date" type="RangePicker" label="日期" />
           <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} />
           <Input name="emaild" type="email" label="牛逼" />
+          <Radio
+            label="坐骑"
+            name="vihcle"
+            options={[
+              { name: "灰机", value: "airplane" },
+              { name: "火箭", value: "rocket" }
+            ]}
+          />{" "}
+          {this.state.fields.vihcle.value === "rocket" && (
+            <Login name="tedst" type="username" />
+          )}
+          {/* <AutoBind
+            name="auto"
+            label="auto"
+            rules={[{ required: true, message: "需要输入这个" }]}
+            component={
+              <Input
+                name="youi"
+                addonBefore={
+                  <Select
+                    name="youiiiiii"
+                    style={{
+                      width: "35px",
+                      lineHeight: "32px",
+                      height: "32px",
+                      marginBottom: 0,
+                      margin: "-1px",
+                      transform: "translateY(-5px)"
+                    }}
+                  >
+                    <Option value="aye">aye</Option>
+                    <Option value="nye">nye</Option>
+                  </Select>
+                }
+              />
+            }
+            // component={({
+            //   form: { getFieldDecorator }
+            // }: FormComponentProps) => (
+            //   <FormAntd.Item label={'自定义组件'}>
+            //     {getFieldDecorator('uu', {
+            //       rules: [{ required: true, message: 'Username is required!' }]
+            //     })(<InputAntd />)}
+            //   </FormAntd.Item>
+            // )}
+          /> */}
           <Submit name="submit" />
         </this.Form>
       </div>
