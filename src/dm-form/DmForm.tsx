@@ -22,7 +22,7 @@ export default function DmFormFactory<T>(
     props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
   ) {
     const {
-      form: { setFieldsValue, validateFields }
+      form: { setFieldsValue, validateFields },
     } = props;
 
     // useEffect(() => {
@@ -42,11 +42,11 @@ export default function DmFormFactory<T>(
       <Form
         labelCol={{
           xs: { span: 24 },
-          sm: { span: 4 }
+          sm: { span: 6 },
         }}
         wrapperCol={{
           xs: { span: 24 },
-          sm: { span: 20 }
+          sm: { span: 18 },
         }}
         onSubmit={handleSubmit}
       >
@@ -71,24 +71,34 @@ export default function DmFormFactory<T>(
     },
     onValuesChange(_: any, values: any) {
       // console.log(values);
-    }
+    },
   })(DmForm);
 }
 
 type Name<T> = { [P in keyof T]: P }[keyof T];
-type fieldIniter = <P>(
-  field: P
-) => {
-  [T in Name<P>]: {
-    value: P[T];
-  };
+type FieldToState2<T> = {
+  [P in Name<T>]: T[P] extends Array<any>
+    ? Array<FieldToState2<T[P]>>
+    : {
+        value: T[P];
+      };
 };
+type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
 export const fieldIniter: fieldIniter = state => {
-  const _state = {} as any;
+  let _state;
+  if ((state as any).constructor === Array) {
+    _state = [] as any;
+  } else {
+    _state = {} as any;
+  }
   for (const name in state) {
-    if ((state as Object).hasOwnProperty(name)) {
-      _state[name] = { value: state[name] };
+    if ((state[name] as any).constructor === Array) {
+      _state[name] = fieldIniter(state[name]);
+    } else if ((state as Object).hasOwnProperty(name)) {
+      if ((state[name] as any).constructor !== Array) {
+        _state[name] = { value: state[name] };
+      }
     }
   }
   return _state;
