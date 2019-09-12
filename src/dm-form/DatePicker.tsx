@@ -22,7 +22,7 @@ const TYPE_DATA = {
   }
 };
 
-interface anyThing {
+interface anyThing extends FormItemProps {
   name: string;
   label?: string;
   message?: string;
@@ -47,7 +47,9 @@ export default function Input(props: anyThing & FormItemProps) {
     children,
     rules,
     type = 'DatePicker',
-    label
+    label,
+    extra,
+    disabled
   } = props;
 
   const DatePicker = (DatePickerAntd as any)[type];
@@ -65,9 +67,10 @@ export default function Input(props: anyThing & FormItemProps) {
         children !== undefined ? (
           children
         ) : (
-          <DatePicker placeholder={placeholder || ''} />
+          <DatePicker placeholder={placeholder || ''} disabled={disabled} />
         )
       )}
+      {extra}
     </Form.Item>
   );
 }

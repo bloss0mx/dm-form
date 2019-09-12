@@ -3,7 +3,7 @@ import { Form, Checkbox as CheckboxAntd, Select as SelectAntd } from 'antd';
 import { FormComponentProps } from 'antd/es/form';
 import { FormItemProps } from './formChildrenDealer';
 
-interface anyThing {
+interface anyThing extends FormItemProps {
   name: string;
   label?: string;
   rules?: Array<Object>;
@@ -44,7 +44,7 @@ export default class Checkbox extends React.Component<
   anyThing & FormItemProps
 > {
   static Option = SelectAntd.Option;
-  constructor(props) {
+  constructor(props: anyThing) {
     super(props);
     if (props.form === undefined) {
       throw Error('此组件需要放在DmForm中');
@@ -52,9 +52,9 @@ export default class Checkbox extends React.Component<
   }
   render() {
     const {
-      form: { getFieldDecorator, getFieldError },
+      form: { getFieldDecorator, getFieldError }
     } = (this.props as any) as FormComponentProps;
-    const { name, rules, label, extra, children, style } = this.props;
+    const { name, rules, label, extra, children, style, disabled } = this.props;
 
     return (
       <Form.Item
@@ -65,8 +65,8 @@ export default class Checkbox extends React.Component<
       >
         {
           getFieldDecorator(name, {
-            rules,
-          })(<SelectAntd>{children}</SelectAntd>) as any
+            rules
+          })(<SelectAntd disabled={disabled}>{children}</SelectAntd>) as any
         }
         {extra}
       </Form.Item>

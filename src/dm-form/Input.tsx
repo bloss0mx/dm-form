@@ -36,7 +36,7 @@ export default function Input(props: anyThing & FormItemProps) {
   const {
     form: { getFieldDecorator, getFieldError }
   } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, type, label } = props;
+  const { name, placeholder, children, rules, type, label, disabled } = props;
 
   return (
     <Form.Item
@@ -51,7 +51,11 @@ export default function Input(props: anyThing & FormItemProps) {
         children !== undefined ? (
           children
         ) : (
-          <InputAntd type="text" placeholder={placeholder || ''} />
+          <InputAntd
+            type="text"
+            placeholder={placeholder || ''}
+            disabled={disabled}
+          />
         )
       )}
     </Form.Item>

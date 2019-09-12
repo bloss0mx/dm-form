@@ -5,9 +5,12 @@ import { FormProps as FormPropsAntd } from 'antd/es/form/Form';
 import { Form, Icon, Input as InputAntd } from 'antd';
 import AutoBind from './AutoBind';
 import FormItem from './FormItem';
+import NoReRender from './NoReRender';
 
 export type value = any;
-export interface FormProps<T> extends FormPropsAntd {}
+export interface FormProps<T> extends FormPropsAntd {
+  disabled?: boolean;
+}
 export type FormItemProps = FormItemProps;
 
 function injectProps<T>(
@@ -23,7 +26,7 @@ function injectProps<T>(
     return React.cloneElement(
       _children,
       {
-        key,
+        key
       },
       children ? content({ form: form, children }) : undefined
     );
@@ -32,7 +35,7 @@ function injectProps<T>(
     _children,
     {
       key,
-      form: form,
+      form: form
     },
     children ? content({ form: form, children }) : undefined
   );
@@ -45,6 +48,14 @@ function childrenDealer<T>(
 ) {
   const { form, ...other } = props;
 
+  if (children === undefined) {
+    console.warn('Children is a undefined!');
+    return;
+  }
+  // no-re-render
+  if (children && (children as React.ReactElement).type === NoReRender) {
+    return children;
+  }
   // form组件函数
   if (
     children &&
@@ -79,7 +90,7 @@ function childrenDealer<T>(
         {/* {injectProps(children, form, index)} */}
         {(children as any).type({
           ...(children as React.ReactElement).props,
-          form,
+          form
         })}
       </Form.Item>
     );
@@ -152,7 +163,7 @@ function propsDealer<T, P>(
 ) {
   const {
     name,
-    form: { getFieldError, isFieldTouched },
+    form: { getFieldError, isFieldTouched }
   } = props;
 
   if (name !== undefined) {
@@ -160,10 +171,10 @@ function propsDealer<T, P>(
       ...props,
       validateStatus:
         isFieldTouched(name) && getFieldError(name) ? 'error' : '',
-      help: (isFieldTouched(name) && getFieldError(name)) || '',
+      help: (isFieldTouched(name) && getFieldError(name)) || ''
     };
   }
   return {
-    ...props,
+    ...props
   };
 }
