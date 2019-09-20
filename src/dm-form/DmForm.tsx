@@ -76,14 +76,14 @@ export default function DmFormFactory<T>(
 }
 
 type Name<T> = { [P in keyof T]: P }[keyof T];
-type FieldToState2<T> = {
+export type FieldToState2<T> = {
   [P in Name<T>]: T[P] extends Array<any>
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
       };
 };
-type fieldIniter = <T>(field: T) => FieldToState2<T>;
+export type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
 export const fieldIniter: fieldIniter = state => {
   let _state;
