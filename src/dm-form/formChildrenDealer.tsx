@@ -8,9 +8,7 @@ import FormItem from './FormItem';
 import NoReRender from './NoReRender';
 
 export type value = any;
-export interface FormProps<T> extends FormPropsAntd {
-  disabled?: boolean;
-}
+export interface FormProps<T> extends FormPropsAntd {}
 export type FormItemProps = FormItemProps;
 
 function injectProps<T>(
@@ -26,7 +24,7 @@ function injectProps<T>(
     return React.cloneElement(
       _children,
       {
-        key
+        key,
       },
       children ? content({ form: form, children }) : undefined
     );
@@ -35,7 +33,7 @@ function injectProps<T>(
     _children,
     {
       key,
-      form: form
+      form: form,
     },
     children ? content({ form: form, children }) : undefined
   );
@@ -90,7 +88,7 @@ function childrenDealer<T>(
         {/* {injectProps(children, form, index)} */}
         {(children as any).type({
           ...(children as React.ReactElement).props,
-          form
+          form,
         })}
       </Form.Item>
     );
@@ -163,7 +161,7 @@ function propsDealer<T, P>(
 ) {
   const {
     name,
-    form: { getFieldError, isFieldTouched }
+    form: { getFieldError, isFieldTouched },
   } = props;
 
   if (name !== undefined) {
@@ -171,10 +169,10 @@ function propsDealer<T, P>(
       ...props,
       validateStatus:
         isFieldTouched(name) && getFieldError(name) ? 'error' : '',
-      help: (isFieldTouched(name) && getFieldError(name)) || ''
+      help: (isFieldTouched(name) && getFieldError(name)) || '',
     };
   }
   return {
-    ...props
+    ...props,
   };
 }

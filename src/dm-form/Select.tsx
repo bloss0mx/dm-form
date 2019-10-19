@@ -40,9 +40,7 @@ interface anyThing extends FormItemProps {
 
 // // export const Option = SelectAntd.Option;
 
-export default class Checkbox extends React.Component<
-  anyThing & FormItemProps
-> {
+export default class Select extends React.Component<anyThing & FormItemProps> {
   static Option = SelectAntd.Option;
   constructor(props: anyThing) {
     super(props);
@@ -54,7 +52,7 @@ export default class Checkbox extends React.Component<
     const {
       form: { getFieldDecorator, getFieldError }
     } = (this.props as any) as FormComponentProps;
-    const { name, rules, label, extra, children, style, disabled } = this.props;
+    const { name, rules, label, extra, children, style } = this.props;
 
     return (
       <Form.Item
@@ -66,7 +64,7 @@ export default class Checkbox extends React.Component<
         {
           getFieldDecorator(name, {
             rules
-          })(<SelectAntd disabled={disabled}>{children}</SelectAntd>) as any
+          })(<SelectAntd>{children}</SelectAntd>) as any
         }
         {extra}
       </Form.Item>

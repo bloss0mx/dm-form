@@ -18,9 +18,9 @@ export default function Submit(props: anyThing & FormProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldsError }
+    form: { getFieldsError },
   } = (props as any) as FormComponentProps;
-  const { name, rules, label, extra, children, style, text, disabled } = props;
+  const { name, rules, label, extra, children, style, text } = props;
 
   function hasErrors(fieldsError: Record<string, string[] | undefined>) {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -31,7 +31,7 @@ export default function Submit(props: anyThing & FormProps) {
       <Button
         type={props.type || 'primary'}
         htmlType="submit"
-        disabled={hasErrors(getFieldsError()) || disabled}
+        disabled={hasErrors(getFieldsError())}
       >
         {text ? text : 'Log in'}
       </Button>

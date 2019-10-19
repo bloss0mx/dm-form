@@ -36,16 +36,7 @@ export default function Login(props: anyThing & FormItemProps) {
   const {
     form: { getFieldDecorator, getFieldError, isFieldTouched }
   } = (props as any) as FormComponentProps;
-  const {
-    name,
-    placeholder,
-    children,
-    rules,
-    type,
-    label,
-    message,
-    disabled
-  } = props;
+  const { name, placeholder, children, rules, type, label, message } = props;
 
   return (
     <Form.Item
@@ -68,7 +59,6 @@ export default function Login(props: anyThing & FormItemProps) {
             type={TYPE_DATA[type].type}
             prefix={TYPE_DATA[type].prefix}
             placeholder={placeholder || ''}
-            disabled={disabled}
           />
         )
       )}

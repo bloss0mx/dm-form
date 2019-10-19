@@ -23,9 +23,9 @@ export default function Checkbox(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError }
+    form: { getFieldDecorator, getFieldError },
   } = (props as any) as FormComponentProps;
-  const { name, rules, label, extra, style, options, disabled } = props;
+  const { name, rules, label, extra, style, options } = props;
 
   // return (
   //   <Form.Item
@@ -48,9 +48,9 @@ export default function Checkbox(props: anyThing & FormItemProps) {
       style={style}
     >
       {getFieldDecorator(name, {
-        rules
+        rules,
       })(
-        <CheckboxAntd.Group disabled={disabled}>
+        <CheckboxAntd.Group>
           {options.map(item => (
             <CheckboxAntd key={item.value} value={item.value}>
               {item.name}

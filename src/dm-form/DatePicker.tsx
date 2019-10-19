@@ -6,20 +6,20 @@ import { FormItemProps } from './formChildrenDealer';
 const TYPE_DATA = {
   DatePicker: {
     format: 'YYYY-MM-DD',
-    rules: []
+    rules: [],
   },
   MonthPicker: {
     format: 'YYYY-MM-DD',
-    rules: []
+    rules: [],
   },
   WeekPicker: {
     format: 'YYYY-MM-DD',
-    rules: []
+    rules: [],
   },
   RangePicker: {
     format: 'YYYY-MM-DD',
-    rules: []
-  }
+    rules: [],
+  },
 };
 
 interface anyThing extends FormItemProps {
@@ -39,7 +39,7 @@ export default function Input(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError }
+    form: { getFieldDecorator, getFieldError },
   } = (props as any) as FormComponentProps;
   const {
     name,
@@ -49,7 +49,6 @@ export default function Input(props: anyThing & FormItemProps) {
     type = 'DatePicker',
     label,
     extra,
-    disabled
   } = props;
 
   const DatePicker = (DatePickerAntd as any)[type];
@@ -62,12 +61,12 @@ export default function Input(props: anyThing & FormItemProps) {
       style={props.style}
     >
       {getFieldDecorator(name, {
-        rules: (type && TYPE_DATA[type].rules) || rules
+        rules: (type && TYPE_DATA[type].rules) || rules,
       })(
         children !== undefined ? (
           children
         ) : (
-          <DatePicker placeholder={placeholder || ''} disabled={disabled} />
+          <DatePicker placeholder={placeholder || ''} />
         )
       )}
       {extra}

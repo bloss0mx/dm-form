@@ -19,9 +19,9 @@ export default function Input(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError }
+    form: { getFieldDecorator, getFieldError },
   } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, label, extra, disabled } = props;
+  const { name, placeholder, children, rules, label, extra } = props;
 
   return (
     <Form.Item
@@ -34,7 +34,7 @@ export default function Input(props: anyThing & FormItemProps) {
         children !== undefined ? (
           children
         ) : (
-          <TimePickerAntd placeholder={placeholder || ''} disabled={disabled} />
+          <TimePickerAntd placeholder={placeholder || ''} />
         )
       )}
       {extra}
