@@ -7,7 +7,8 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <h1>DM-Form</h1>
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
         <DmForm />
       </header>
     </div>

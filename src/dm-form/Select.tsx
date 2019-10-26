@@ -3,7 +3,7 @@ import { Form, Checkbox as CheckboxAntd, Select as SelectAntd } from "antd";
 import { FormComponentProps } from "antd/es/form";
 import { FormItemProps } from "./formChildrenDealer";
 
-interface anyThing {
+interface anyThing extends FormItemProps {
   name: string;
   label?: string;
   rules?: Array<Object>;
@@ -40,11 +40,9 @@ interface anyThing {
 
 // // export const Option = SelectAntd.Option;
 
-export default class Checkbox extends React.Component<
-  anyThing & FormItemProps
-> {
+export default class Select extends React.Component<anyThing & FormItemProps> {
   static Option = SelectAntd.Option;
-  constructor(props: anyThing & FormItemProps) {
+  constructor(props: anyThing) {
     super(props);
     if (props.form === undefined) {
       throw Error("此组件需要放在DmForm中");

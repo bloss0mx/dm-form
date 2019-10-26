@@ -5,6 +5,7 @@ import { FormProps as FormPropsAntd } from 'antd/es/form/Form';
 import { Form, Icon, Input as InputAntd } from 'antd';
 import AutoBind from './AutoBind';
 import FormItem from './FormItem';
+import NoReRender from './NoReRender';
 
 export type value = any;
 export interface FormProps<T> extends FormPropsAntd {}
@@ -45,6 +46,14 @@ function childrenDealer<T>(
 ) {
   const { form, ...other } = props;
 
+  if (children === undefined) {
+    console.warn('Children is a undefined!');
+    return;
+  }
+  // no-re-render
+  if (children && (children as React.ReactElement).type === NoReRender) {
+    return children;
+  }
   // form组件函数
   if (
     children &&

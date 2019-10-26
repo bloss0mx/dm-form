@@ -23,31 +23,31 @@ export default function Radio(props: anyThing & FormItemProps) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator, getFieldError }
+    form: { getFieldDecorator, getFieldError },
   } = (props as any) as FormComponentProps;
   const { name, rules, label, extra, children, style, options } = props;
 
   return (
-    // <Form.Item
-    //   label={label}
-    //   validateStatus={getFieldError(name) ? 'error' : ''}
-    //   help={getFieldError(name) || ''}
-    //   style={style}
-    // >
-    //   {
-    getFieldDecorator(name, {
-      rules
-    })(
-      <RadioAntd.Group>
-        {options.map(item => (
-          <RadioAntd key={item.value} value={item.value}>
-            {item.name}
-          </RadioAntd>
-        ))}
-      </RadioAntd.Group>
-    ) as React.ReactElement
-    //   }
-    //   {extra}
-    // </Form.Item>
+    <Form.Item
+      label={label}
+      validateStatus={getFieldError(name) ? 'error' : ''}
+      help={getFieldError(name) || ''}
+      style={style}
+    >
+      {
+        getFieldDecorator(name, {
+          rules,
+        })(
+          <RadioAntd.Group>
+            {options.map(item => (
+              <RadioAntd key={item.value} value={item.value}>
+                {item.name}
+              </RadioAntd>
+            ))}
+          </RadioAntd.Group>
+        ) as React.ReactElement
+      }
+      {/* //   {extra} */}
+    </Form.Item>
   );
 }

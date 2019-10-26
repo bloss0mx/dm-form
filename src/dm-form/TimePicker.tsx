@@ -1,28 +1,27 @@
 import React from 'react';
-import { Form, Icon, InputNumber as InputNumberAntd } from 'antd';
+import { Form, TimePicker as TimePickerAntd } from 'antd';
 import { FormComponentProps } from 'antd/es/form';
 import { FormItemProps } from './formChildrenDealer';
 
-interface anyThing {
+interface anyThing extends FormItemProps {
   name: string;
   label?: string;
   message?: string;
   placeholder?: string;
   children?: any;
-  // type?: 'email';
   rules?: Array<Object>;
   style?: React.CSSProperties;
   [name: string]: any;
 }
 
-export default function InputNumber(props: anyThing & FormItemProps) {
+export default function Input(props: anyThing & FormItemProps) {
   if (props.form === undefined) {
     throw Error('此组件需要放在DmForm中');
   }
   const {
     form: { getFieldDecorator, getFieldError },
   } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, type, label, extra } = props;
+  const { name, placeholder, children, rules, label, extra } = props;
 
   return (
     <Form.Item
@@ -31,13 +30,11 @@ export default function InputNumber(props: anyThing & FormItemProps) {
       help={getFieldError(name) || ''}
       style={props.style}
     >
-      {getFieldDecorator(name, {
-        rules: rules,
-      })(
+      {getFieldDecorator(name, { rules })(
         children !== undefined ? (
           children
         ) : (
-          <InputNumberAntd placeholder={placeholder || ''} />
+          <TimePickerAntd placeholder={placeholder || ''} />
         )
       )}
       {extra}
