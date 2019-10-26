@@ -1,7 +1,7 @@
-import React from 'react';
-import { Form, Checkbox as CheckboxAntd } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
-import { FormItemProps } from './formChildrenDealer';
+import React from "react";
+import { Form, Checkbox as CheckboxAntd } from "antd";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "./formChildrenDealer";
 
 type CheckBoxOption = {
   name: any;
@@ -18,47 +18,32 @@ interface anyThing extends FormItemProps {
   [name: string]: any;
 }
 
-export default function Checkbox(props: anyThing & FormItemProps) {
-  if (props.form === undefined) {
-    throw Error('此组件需要放在DmForm中');
+export default class Checkbox extends React.PureComponent<
+  anyThing & FormItemProps
+> {
+  constructor(props: anyThing & FormItemProps) {
+    super(props);
   }
-  const {
-    form: { getFieldDecorator, getFieldError },
-  } = (props as any) as FormComponentProps;
-  const { name, rules, label, extra, style, options } = props;
+  render() {
+    if (this.props.form === undefined) {
+      throw Error("此组件需要放在DmForm中");
+    }
+    const {
+      form: { getFieldDecorator, getFieldError }
+    } = (this.props as any) as FormComponentProps;
+    const { name, rules, label, extra } = this.props;
 
-  // return (
-  //   <Form.Item
-  //     key={name}
-  //     validateStatus={getFieldError(name) ? 'error' : ''}
-  //     help={getFieldError(name) || ''}
-  //     style={style}
-  //   >
-  //     {getFieldDecorator(name, {
-  //       rules,
-  //     })(<CheckboxAntd>{label}</CheckboxAntd>)}
-  //     {extra}
-  //   </Form.Item>
-  // );
-  return (
-    <Form.Item
-      key={name}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={style}
-    >
-      {getFieldDecorator(name, {
-        rules,
-      })(
-        <CheckboxAntd.Group>
-          {options.map(item => (
-            <CheckboxAntd key={item.value} value={item.value}>
-              {item.name}
-            </CheckboxAntd>
-          ))}
-        </CheckboxAntd.Group>
-      )}
-      {extra}
-    </Form.Item>
-  );
+    return (
+      <Form.Item
+        key={name}
+        validateStatus={getFieldError(name) ? "error" : ""}
+        help={getFieldError(name) || ""}
+      >
+        {getFieldDecorator(name, {
+          rules
+        })(<CheckboxAntd>{label}</CheckboxAntd>)}
+        {extra}
+      </Form.Item>
+    );
+  }
 }

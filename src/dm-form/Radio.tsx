@@ -1,8 +1,8 @@
-import React from 'react';
-import { Form, Checkbox as CheckboxAntd, Radio as RadioAntd } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
-import { RadioGroupProps } from 'antd/es/radio';
-import { FormItemProps } from './formChildrenDealer';
+import React from "react";
+import { Form, Checkbox as CheckboxAntd, Radio as RadioAntd } from "antd";
+import { FormComponentProps } from "antd/es/form";
+import { RadioGroupProps } from "antd/es/radio";
+import { FormItemProps } from "./formChildrenDealer";
 
 type RadioOption = {
   name: any;
@@ -18,36 +18,41 @@ interface anyThing {
   [name: string]: any;
 }
 
-export default function Radio(props: anyThing & FormItemProps) {
-  if (props.form === undefined) {
-    throw Error('此组件需要放在DmForm中');
+export default class Radio extends React.Component<anyThing & FormItemProps> {
+  constructor(props: anyThing & FormItemProps) {
+    super(props);
   }
-  const {
-    form: { getFieldDecorator, getFieldError },
-  } = (props as any) as FormComponentProps;
-  const { name, rules, label, extra, children, style, options } = props;
+  render() {
+    if (this.props.form === undefined) {
+      throw Error("此组件需要放在DmForm中");
+    }
+    const {
+      form: { getFieldDecorator, getFieldError }
+    } = (this.props as any) as FormComponentProps;
+    const { name, rules, label, extra, children, style, options } = this.props;
 
-  return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={style}
-    >
-      {
-        getFieldDecorator(name, {
-          rules,
-        })(
-          <RadioAntd.Group>
-            {options.map(item => (
-              <RadioAntd key={item.value} value={item.value}>
-                {item.name}
-              </RadioAntd>
-            ))}
-          </RadioAntd.Group>
-        ) as React.ReactElement
-      }
-      {/* //   {extra} */}
-    </Form.Item>
-  );
+    return (
+      // <Form.Item
+      //   label={label}
+      //   validateStatus={getFieldError(name) ? 'error' : ''}
+      //   help={getFieldError(name) || ''}
+      //   style={style}
+      // >
+      //   {
+      getFieldDecorator(name, {
+        rules
+      })(
+        <RadioAntd.Group>
+          {options.map(item => (
+            <RadioAntd key={item.value} value={item.value}>
+              {item.name}
+            </RadioAntd>
+          ))}
+        </RadioAntd.Group>
+      ) as React.ReactElement
+      //   }
+      //   {extra}
+      // </Form.Item>
+    );
+  }
 }

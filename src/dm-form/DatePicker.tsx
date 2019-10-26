@@ -1,25 +1,25 @@
-import React from 'react';
-import { Form, DatePicker as DatePickerAntd } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
-import { FormItemProps } from './formChildrenDealer';
+import React from "react";
+import { Form, DatePicker as DatePickerAntd } from "antd";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "./formChildrenDealer";
 
 const TYPE_DATA = {
   DatePicker: {
-    format: 'YYYY-MM-DD',
-    rules: [],
+    format: "YYYY-MM-DD",
+    rules: []
   },
   MonthPicker: {
-    format: 'YYYY-MM-DD',
-    rules: [],
+    format: "YYYY-MM-DD",
+    rules: []
   },
   WeekPicker: {
-    format: 'YYYY-MM-DD',
-    rules: [],
+    format: "YYYY-MM-DD",
+    rules: []
   },
   RangePicker: {
-    format: 'YYYY-MM-DD',
-    rules: [],
-  },
+    format: "YYYY-MM-DD",
+    rules: []
+  }
 };
 
 interface anyThing extends FormItemProps {
@@ -28,48 +28,51 @@ interface anyThing extends FormItemProps {
   message?: string;
   placeholder?: string;
   children?: any;
-  type?: 'DatePicker' | 'MonthPicker' | 'WeekPicker' | 'RangePicker';
+  type?: "DatePicker" | "MonthPicker" | "WeekPicker" | "RangePicker";
   rules?: Array<Object>;
   style?: React.CSSProperties;
   [name: string]: any;
 }
 
-export default function Input(props: anyThing & FormItemProps) {
-  if (props.form === undefined) {
-    throw Error('此组件需要放在DmForm中');
+export default class Input extends React.PureComponent<anyThing & FormItemProps> {
+  constructor(props: anyThing & FormItemProps) {
+    super(props);
   }
-  const {
-    form: { getFieldDecorator, getFieldError },
-  } = (props as any) as FormComponentProps;
-  const {
-    name,
-    placeholder,
-    children,
-    rules,
-    type = 'DatePicker',
-    label,
-    extra,
-  } = props;
+  render() {
+    if (this.props.form === undefined) {
+      throw Error("此组件需要放在DmForm中");
+    }
+    const {
+      form: { getFieldDecorator, getFieldError }
+    } = (this.props as any) as FormComponentProps;
+    const {
+      name,
+      placeholder,
+      children,
+      rules,
+      type = "DatePicker",
+      label
+    } = this.props;
 
-  const DatePicker = (DatePickerAntd as any)[type];
+    const DatePicker = (DatePickerAntd as any)[type];
 
-  return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={props.style}
-    >
-      {getFieldDecorator(name, {
-        rules: (type && TYPE_DATA[type].rules) || rules,
-      })(
-        children !== undefined ? (
-          children
-        ) : (
-          <DatePicker placeholder={placeholder || ''} />
-        )
-      )}
-      {extra}
-    </Form.Item>
-  );
+    return (
+      <Form.Item
+        label={label}
+        validateStatus={getFieldError(name) ? "error" : ""}
+        help={getFieldError(name) || ""}
+        style={this.props.style}
+      >
+        {getFieldDecorator(name, {
+          rules: (type && TYPE_DATA[type].rules) || rules
+        })(
+          children !== undefined ? (
+            children
+          ) : (
+            <DatePicker placeholder={placeholder || ""} />
+          )
+        )}
+      </Form.Item>
+    );
+  }
 }

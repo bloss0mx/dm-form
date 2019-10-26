@@ -1,7 +1,7 @@
-import React from 'react';
-import { Form, Icon, InputNumber as InputNumberAntd } from 'antd';
-import { FormComponentProps } from 'antd/es/form';
-import { FormItemProps } from './formChildrenDealer';
+import React from "react";
+import { Form, Icon, InputNumber as InputNumberAntd } from "antd";
+import { FormComponentProps } from "antd/es/form";
+import { FormItemProps } from "./formChildrenDealer";
 
 interface anyThing {
   name: string;
@@ -15,32 +15,38 @@ interface anyThing {
   [name: string]: any;
 }
 
-export default function InputNumber(props: anyThing & FormItemProps) {
-  if (props.form === undefined) {
-    throw Error('此组件需要放在DmForm中');
+export default class InputNumber extends React.Component<
+  anyThing & FormItemProps
+> {
+  constructor(props: anyThing & FormItemProps) {
+    super(props);
   }
-  const {
-    form: { getFieldDecorator, getFieldError },
-  } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, type, label, extra } = props;
+  render() {
+    if (this.props.form === undefined) {
+      throw Error("此组件需要放在DmForm中");
+    }
+    const {
+      form: { getFieldDecorator, getFieldError }
+    } = (this.props as any) as FormComponentProps;
+    const { name, placeholder, children, rules, type, label } = this.props;
 
-  return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={props.style}
-    >
-      {getFieldDecorator(name, {
-        rules: rules,
-      })(
-        children !== undefined ? (
-          children
-        ) : (
-          <InputNumberAntd placeholder={placeholder || ''} />
-        )
-      )}
-      {extra}
-    </Form.Item>
-  );
+    return (
+      <Form.Item
+        label={label}
+        validateStatus={getFieldError(name) ? "error" : ""}
+        help={getFieldError(name) || ""}
+        style={this.props.style}
+      >
+        {getFieldDecorator(name, {
+          rules: rules
+        })(
+          children !== undefined ? (
+            children
+          ) : (
+            <InputNumberAntd placeholder={placeholder || ""} />
+          )
+        )}
+      </Form.Item>
+    );
+  }
 }
