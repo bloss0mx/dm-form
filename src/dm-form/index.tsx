@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Form as FormAntd, Input as InputAntd } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
+import Form, { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
 
 import Login from './Login';
 import Input from './Input';
 import InputNumber from './InputNumber';
-import DmForm, { fieldIniter, field2Obj, obj2Field, list } from './DmForm';
+import DmForm, {
+  fieldIniter,
+  field2Obj,
+  obj2Field,
+  list,
+  beforeUseForm,
+  useFormState,
+  useFormComponent,
+  useOneStep
+} from './DmForm';
 import Submit from './Submit';
 import CheckBox from './CheckBox';
 import FormItem from './FormItem';
@@ -184,10 +193,10 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
   render() {
     const { time, fields } = this.state;
 
-    console.time('field2Obj');
+    // console.time('field2Obj');
     const fieldName = field2Obj(this.state.fields, false);
-    console.timeEnd('field2Obj');
-    console.log(fieldName);
+    // console.timeEnd('field2Obj');
+    // console.log(fieldName, this.state.fields);
 
     return (
       <div style={{ width: '500px' }}>
@@ -348,7 +357,57 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           /> */}
           <Submit name="submit" />
         </this.Form>
+        {/* <MyForm ...myfield /> */}
+        <FormHook />
+        <OneStepForm />
       </div>
     );
   }
+}
+
+function FormHook() {
+  const [formData, setFormData] = useFormState({
+    text: '我是默认值',
+    yo: '我也是'
+  });
+
+  const MyForm = useFormComponent(console.log);
+
+  const handleFormChange = (changedFields: any) => {
+    setFormData({ ...formData, ...changedFields });
+  };
+
+  useEffect(() => {
+    console.log(field2Obj(formData));
+  }, [formData]);
+
+  return (
+    <MyForm onChange={handleFormChange} {...formData}>
+      <Input name="text" label="text" />
+      <Input name="yo" label="yo" />
+      <Submit name="submit" />
+    </MyForm>
+  );
+}
+
+function OneStepForm() {
+  const { formData, MyForm, handleFormChange } = useOneStep(
+    {
+      text: '我是默认值',
+      yo: '我也是'
+    },
+    console.log
+  );
+
+  useEffect(() => {
+    console.log(field2Obj(formData));
+  }, [formData]);
+
+  return (
+    <MyForm onChange={handleFormChange} {...formData}>
+      <Input name="text" label="text" />
+      <Input name="yo" label="yo" />
+      <Submit name="submit" />
+    </MyForm>
+  );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Form } from 'antd';
 import { FormComponentProps, FormCreateOption } from 'antd/es/form';
 import { content } from './formChildrenDealer';
@@ -8,16 +8,7 @@ interface FormOnly<T> {
   onSubmit: (values: T) => value;
 }
 
-/**
- * 表单工厂
- * @param InitialForm 初始化表单
- * @param actions 事件
- */
-export default function DmFormFactory<T>(
-  // InitialForm?: T,
-  actions?: FormProps<T> & FormOnly<T>
-  // FormCreateOption?: FormCreateOption<any>
-) {
+function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
   class DmForm<P> extends React.Component<
     FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
   > {
@@ -35,7 +26,7 @@ export default function DmFormFactory<T>(
       e.preventDefault();
       validateFields((err: string, values: T) => {
         if (!err) {
-          if (actions) actions.onSubmit(field2Obj(values, true));
+          if (actions) actions.onSubmit(_field2Obj(values, 'onSubmit'));
         }
       });
     }
@@ -60,7 +51,12 @@ export default function DmFormFactory<T>(
       );
     }
   }
+  return DmForm;
+}
 
+export function beforeUseForm<T>(onSubmit?: Function) {
+  // let _setFiled: Function = () => {};
+  // let _onSubmit: Function = () => {};
   return Form.create({
     name: 'global_state',
     onFieldsChange(props: any, changedFields: any) {
@@ -76,7 +72,76 @@ export default function DmFormFactory<T>(
       return t;
     },
     onValuesChange(_: any, values: any) {}
-  })(DmForm);
+  })(Init({ onSubmit } as any));
+  // function(initialState: T, onSubmit: Function) {
+  //   const [field, setfield] = useState(initialState);
+  //   _onSubmit = onSubmit;
+  //   _setFiled = setfield;
+  //   return field;
+  // }
+}
+
+/**
+ * 初始化form的state，返回值同useState
+ * @param arg 默认值
+ */
+export const useFormState = (arg?: any) => useState(obj2Field(arg));
+
+/**
+ * 初始化onsubmit事件，返回form组件
+ * @param onSubmit onsubmit事件
+ */
+export const useFormComponent = (onSubmit?: Function) => {
+  return useMemo(() => beforeUseForm(onSubmit), []);
+};
+
+/**
+ * 一步使用owlForm
+ * @param initState 默认值
+ * @param onSubmit onsubmit事件
+ */
+export const useOneStep = (initState?: any, onSubmit?: Function) => {
+  const [formData, setFormData] = useFormState(initState || {});
+
+  const MyForm = useFormComponent(onSubmit);
+
+  const handleFormChange = (changedFields: any) => {
+    setFormData({ ...formData, ...changedFields });
+  };
+  return {
+    formData,
+    // setFormData,
+    MyForm,
+    handleFormChange
+  };
+};
+
+/**
+ * 表单工厂
+ * @param InitialForm 初始化表单
+ * @param actions 事件
+ */
+export default function DmFormFactory<T>(
+  // InitialForm?: T,
+  actions?: FormProps<T> & FormOnly<T>
+  // FormCreateOption?: FormCreateOption<any>
+) {
+  return Form.create({
+    name: 'global_state',
+    onFieldsChange(props: any, changedFields: any) {
+      (props as any).onChange(changedFields);
+    },
+    mapPropsToFields(props: any) {
+      const t: any = {};
+      for (const i in props) {
+        if (props.hasOwnProperty(i) && i !== 'children') {
+          t[i] = Form.createFormField({ ...props[i] });
+        }
+      }
+      return t;
+    },
+    onValuesChange(_: any, values: any) {}
+  })(Init(actions));
 }
 
 type Name<T> = { [P in keyof T]: P }[keyof T];
@@ -160,13 +225,13 @@ function nameDealer(name = '') {
 /**
  * field转换为对象
  * @param field 传入filed对象
- * @param getValue 为true将filed转换为js对象，为false时输出以js对象的方式输出field中的名字
+ * @param getValue 为true将filed转换为js对象，为false时输出以js对象的方式输出field中的名字，onSubmit专门输出onsbumit回调的内容
  * @param container 新容器
  * @param currName 当前名字
  */
 function _field2Obj(
   field: any,
-  getValue: boolean,
+  getValue: boolean | 'onSubmit',
   container = {},
   currName = ''
 ) {
@@ -182,7 +247,7 @@ function _field2Obj(
   keys.forEach((v, index) => {
     const { curr, symbol, nextLevelName } = nameDealer(v);
     const nextCurr = nameDealer(keys[index + 1] || '').curr;
-    if (symbol) {
+    if (symbol && symbol !== 'value') {
       // 有后继 深入
       nextField[nextLevelName] = field[v];
       if (curr !== nextCurr || index === keys.length - 1) {
@@ -218,9 +283,13 @@ function _field2Obj(
       }
     } else {
       // 无后继 直接赋值
-      if (getValue) {
-        if (obj.constructor === Array) obj.push(field[v]);
-        else if (obj.constructor === Object) obj[curr] = field[v];
+      if (getValue === true) {
+        if (obj.constructor === Array && field[v]) obj.push(field[v].value);
+        else if (obj.constructor === Object && field[v])
+          obj[curr] = field[v].value;
+      } else if (getValue === 'onSubmit') {
+        if (obj.constructor === Array && field[v]) obj.push(field[v]);
+        else if (obj.constructor === Object && field[v]) obj[curr] = field[v];
       } else {
         if (obj.constructor === Array) obj.push(currName + curr);
         else if (obj.constructor === Object) obj[curr] = currName + curr;
@@ -236,6 +305,7 @@ function _field2Obj(
  * @param getValue 为true将filed转换为js对象，为false时输出以js对象的方式输出field中的名字
  */
 export function field2Obj(field: any, getValue: boolean = true) {
+  // console.warn(field);
   return _field2Obj(field, getValue);
 }
 
