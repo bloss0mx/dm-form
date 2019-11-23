@@ -14,30 +14,38 @@ interface anyThing extends FormItemProps {
   [name: string]: any;
 }
 
-export default function Input(props: anyThing & FormItemProps) {
-  if (props.form === undefined) {
-    throw Error('此组件需要放在DmForm中');
+export default class TimePicker extends React.Component<
+  anyThing & FormItemProps
+> {
+  constructor(props: anyThing & FormItemProps) {
+    super(props);
   }
-  const {
-    form: { getFieldDecorator, getFieldError },
-  } = (props as any) as FormComponentProps;
-  const { name, placeholder, children, rules, label, extra } = props;
 
-  return (
-    <Form.Item
-      label={label}
-      validateStatus={getFieldError(name) ? 'error' : ''}
-      help={getFieldError(name) || ''}
-      style={props.style}
-    >
-      {getFieldDecorator(name, { rules })(
-        children !== undefined ? (
-          children
-        ) : (
-          <TimePickerAntd placeholder={placeholder || ''} />
-        )
-      )}
-      {extra}
-    </Form.Item>
-  );
+  render() {
+    if (this.props.form === undefined) {
+      throw Error('此组件需要放在DmForm中');
+    }
+    const {
+      form: { getFieldDecorator, getFieldError }
+    } = (this.props as any) as FormComponentProps;
+    const { name, placeholder, children, rules, label, extra } = this.props;
+
+    return (
+      <Form.Item
+        label={label}
+        validateStatus={getFieldError(name) ? 'error' : ''}
+        help={getFieldError(name) || ''}
+        style={this.props.style}
+      >
+        {getFieldDecorator(name, { rules })(
+          children !== undefined ? (
+            children
+          ) : (
+            <TimePickerAntd placeholder={placeholder || ''} />
+          )
+        )}
+        {extra}
+      </Form.Item>
+    );
+  }
 }
