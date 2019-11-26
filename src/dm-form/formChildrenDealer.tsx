@@ -14,35 +14,35 @@ export type FormItemProps = FormItemProps;
 function injectProps<T>(
   _children: React.ReactElement,
   form: FormComponentProps['form'],
-  key: number
+  key: number | string
 ): React.ReactElement {
   const { children } = _children.props;
 
   if (_children.type === Form.Item) {
-    return content({ form: form, children }) as React.ReactElement;
+    return content({ form, children }) as React.ReactElement;
   } else if (isDOMElement(_children)) {
     return React.cloneElement(
       _children,
       {
         key,
       },
-      children ? content({ form: form, children }) : undefined
+      children ? content({ form, children }) : undefined
     );
   }
   return React.cloneElement(
     _children,
     {
       key,
-      form: form,
+      form,
     },
-    children ? content({ form: form, children }) : undefined
+    children ? content({ form, children }) : undefined
   );
 }
 
 function childrenDealer<T>(
   children: React.ReactElement,
   props: FormComponentProps & React.PropsWithChildren<T>,
-  index: number
+  index: number | string
 ) {
   const { form, ...other } = props;
 
@@ -75,27 +75,32 @@ function childrenDealer<T>(
     // console.log(children);
     return injectProps(children as React.ReactElement, form, index);
   }
-  // AutoBind
-  if (
-    React.isValidElement(children) &&
-    (children as React.ReactElement).type === AutoBind
-  ) {
-    return (
-      <Form.Item
-        key={index}
-        {...propsDealer({ ...(children as React.ReactElement).props, form })}
-      >
-        {/* {injectProps(children, form, index)} */}
-        {(children as any).type({
-          ...(children as React.ReactElement).props,
-          form,
-        })}
-      </Form.Item>
-    );
-  }
+  // // AutoBind
+  // if (
+  //   React.isValidElement(children) &&
+  //   (children as React.ReactElement).type === AutoBind
+  // ) {
+  //   return (
+  //     <Form.Item
+  //       key={index}
+  //       {...propsDealer({ ...(children as React.ReactElement).props, form })}
+  //     >
+  //       {/* {injectProps(children, form, index)} */}
+  //       {(children as any).type({
+  //         ...(children as React.ReactElement).props,
+  //         form,
+  //       })}
+  //     </Form.Item>
+  //   );
+  // }
   // 单个有效子节点
   if (React.isValidElement(children)) {
-    return injectProps(children, form, index);
+    // console.log("children", children);
+    return injectProps(
+      children,
+      form,
+      (children.props && (children.props as any).name) || children.key || index
+    );
   }
   // 其他类型
   return children;
@@ -127,7 +132,7 @@ function isDOMElement(element: any) {
 function funcCompDealer(
   formProps: FormComponentProps,
   selfDefinedComponent: (props: FormComponentProps) => React.ReactElement,
-  key: number
+  key: number | string
 ): React.ReactElement {
   return React.cloneElement(selfDefinedComponent({ ...formProps }), { key });
 }

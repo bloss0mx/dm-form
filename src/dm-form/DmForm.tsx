@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Form } from 'antd';
-import { FormComponentProps, FormCreateOption } from 'antd/es/form';
-import { content } from './formChildrenDealer';
-import { FormProps, value } from './formChildrenDealer';
+import React, { useEffect, useState, useMemo } from "react";
+import { Form } from "antd";
+import { FormComponentProps, FormCreateOption } from "antd/es/form";
+import { content } from "./formChildrenDealer";
+import { FormProps, value } from "./formChildrenDealer";
 
 interface FormOnly<T> {
   onSubmit: (values: T) => value;
 }
 
 function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
-  class DmForm<P> extends React.Component<
+  class DmForm<P> extends React.PureComponent<
     FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
   > {
     constructor(
@@ -26,14 +26,13 @@ function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
       e.preventDefault();
       validateFields((err: string, values: T) => {
         if (!err) {
-          if (actions) actions.onSubmit(_field2Obj(values, 'onSubmit'));
+          if (actions) actions.onSubmit(_field2Obj(values, "onSubmit"));
         }
       });
     }
 
     render() {
       const { form, children } = this.props;
-
       return (
         <Form
           labelCol={{
@@ -58,17 +57,19 @@ export function beforeUseForm<T>(onSubmit?: Function) {
   // let _setFiled: Function = () => {};
   // let _onSubmit: Function = () => {};
   return Form.create({
-    name: 'global_state',
+    name: "global_state",
     onFieldsChange(props: any, changedFields: any) {
       (props as any).onChange(changedFields);
     },
     mapPropsToFields(props: any) {
+      // console.time('mapPropsToFields');
       const t: any = {};
       for (const i in props) {
-        if (props.hasOwnProperty(i) && i !== 'children') {
+        if (props.hasOwnProperty(i) && i !== "children") {
           t[i] = Form.createFormField({ ...props[i] });
         }
       }
+      // console.timeEnd('mapPropsToFields');
       return t;
     },
     onValuesChange(_: any, values: any) {}
@@ -85,7 +86,9 @@ export function beforeUseForm<T>(onSubmit?: Function) {
  * 初始化form的state，返回值同useState
  * @param arg 默认值
  */
-export const useFormState = (arg?: any) => useState(obj2Field(arg));
+export const useFormState = (arg?: any) => {
+  return useState(useMemo(() => obj2Field(arg), []));
+};
 
 /**
  * 初始化onsubmit事件，返回form组件
@@ -101,13 +104,19 @@ export const useFormComponent = (onSubmit?: Function) => {
  * @param onSubmit onsubmit事件
  */
 export const useOneStep = (initState?: any, onSubmit?: Function) => {
+  // console.time('useOneStep1');
   const [formData, setFormData] = useFormState(initState || {});
+  // console.timeEnd('useOneStep1');
 
+  // console.time('useOneStep2');
   const MyForm = useFormComponent(onSubmit);
+  // console.timeEnd('useOneStep2');
 
+  // console.time('useOneStep3');
   const handleFormChange = (changedFields: any) => {
     setFormData({ ...formData, ...changedFields });
   };
+  // console.timeEnd('useOneStep3');
   return {
     formData,
     // setFormData,
@@ -127,14 +136,14 @@ export default function DmFormFactory<T>(
   // FormCreateOption?: FormCreateOption<any>
 ) {
   return Form.create({
-    name: 'global_state',
+    name: "global_state",
     onFieldsChange(props: any, changedFields: any) {
       (props as any).onChange(changedFields);
     },
     mapPropsToFields(props: any) {
       const t: any = {};
       for (const i in props) {
-        if (props.hasOwnProperty(i) && i !== 'children') {
+        if (props.hasOwnProperty(i) && i !== "children") {
           t[i] = Form.createFormField({ ...props[i] });
         }
       }
@@ -183,17 +192,17 @@ export function genHash() {
  * @param obj
  * @param preName
  */
-export function obj2Field(obj: any, preName = '') {
+export function obj2Field(obj: any, preName = "") {
   let data = {} as any;
   if (obj.constructor === Array) {
-    const preFix = preName === '' ? '' : preName + '_';
+    const preFix = preName === "" ? "" : preName + "_";
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         data = { ...data, ...obj2Field(obj[v], preFix + genHash()) };
       }
     }
   } else if (obj.constructor === Object) {
-    const preFix = preName === '' ? '' : preName + '$';
+    const preFix = preName === "" ? "" : preName + "$";
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         data = { ...data, ...obj2Field(obj[v], preFix + v) };
@@ -209,14 +218,14 @@ export function obj2Field(obj: any, preName = '') {
  * 按层获取path信息
  * @param name
  */
-function nameDealer(name = '') {
+function nameDealer(name = "") {
   const curr = name.match(/^[^_\$]+/);
-  const rmedCurr = name.replace(/^[^_\$]+/, '');
+  const rmedCurr = name.replace(/^[^_\$]+/, "");
   const symbol = rmedCurr.match(/^[_\$]/);
-  const nextLevelName = rmedCurr.replace(/^[_\$]/, '');
+  const nextLevelName = rmedCurr.replace(/^[_\$]/, "");
   return {
     name,
-    curr: (curr && curr[0]) || '',
+    curr: (curr && curr[0]) || "",
     symbol: symbol && symbol[0],
     nextLevelName
   };
@@ -231,9 +240,9 @@ function nameDealer(name = '') {
  */
 function _field2Obj(
   field: any,
-  getValue: boolean | 'onSubmit',
+  getValue: boolean | "onSubmit",
   container = {},
-  currName = ''
+  currName = ""
 ) {
   let obj: any; // 本层容器
   const keys = Object.keys(field).sort((a, b) => a.localeCompare(b));
@@ -246,13 +255,13 @@ function _field2Obj(
 
   keys.forEach((v, index) => {
     const { curr, symbol, nextLevelName } = nameDealer(v);
-    const nextCurr = nameDealer(keys[index + 1] || '').curr;
-    if (symbol && symbol !== 'value') {
+    const nextCurr = nameDealer(keys[index + 1] || "").curr;
+    if (symbol && symbol !== "value") {
       // 有后继 深入
       nextField[nextLevelName] = field[v];
       if (curr !== nextCurr || index === keys.length - 1) {
         // 本层不同
-        if (symbol === '$') {
+        if (symbol === "$") {
           // 对象
           if (obj.constructor === Array)
             obj.push(
@@ -265,7 +274,7 @@ function _field2Obj(
               ..._field2Obj(nextField, getValue, {}, currName + curr + symbol)
             };
           }
-        } else if (symbol === '_') {
+        } else if (symbol === "_") {
           // 数组
           if (obj.constructor === Array)
             obj.push(
@@ -287,7 +296,7 @@ function _field2Obj(
         if (obj.constructor === Array && field[v]) obj.push(field[v].value);
         else if (obj.constructor === Object && field[v])
           obj[curr] = field[v].value;
-      } else if (getValue === 'onSubmit') {
+      } else if (getValue === "onSubmit") {
         if (obj.constructor === Array && field[v]) obj.push(field[v]);
         else if (obj.constructor === Object && field[v]) obj[curr] = field[v];
       } else {
@@ -317,19 +326,19 @@ export function field2Obj(field: any, getValue: boolean = true) {
 export function list(list: any, prefix: string) {
   const keys1 = Object.keys(list)
     .sort((a, b) => a.localeCompare(b))
-    .filter(item => item.match(new RegExp('^' + prefix)));
+    .filter(item => item.match(new RegExp("^" + prefix)));
 
   return ([{ curr: undefined, answer: [] }, ...keys1] as any).reduce(
     (sum: any, item: any) => {
       const newSum = { ...sum };
-      const matched1st = item.replace(new RegExp('^' + prefix + '[$_]'), '');
-      const matched2nd = matched1st.replace(/^[^$_]+/, '').match(/^[$]/);
+      const matched1st = item.replace(new RegExp("^" + prefix + "[$_]"), "");
+      const matched2nd = matched1st.replace(/^[^$_]+/, "").match(/^[$]/);
       if (
         (matched1st && matched1st.match(/^[^$_]+/)[0] !== newSum.curr) ||
         newSum.curr === undefined
       ) {
         newSum.curr = item
-          .replace(new RegExp('^' + prefix + '[$_]'), '')
+          .replace(new RegExp("^" + prefix + "[$_]"), "")
           .match(/^[^$_]+/)[0];
         if (matched2nd) newSum.answer = [...sum.answer, []];
       }

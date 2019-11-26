@@ -14,7 +14,7 @@ import DmForm, {
   beforeUseForm,
   useFormState,
   useFormComponent,
-  useOneStep
+  useOneStep,
 } from './DmForm';
 import Submit from './Submit';
 import CheckBox from './CheckBox';
@@ -43,7 +43,7 @@ export {
   //
   fieldIniter,
   field2Obj,
-  obj2Field
+  obj2Field,
 };
 
 const validator = (rule: object, value: string, callback: Function) => {
@@ -120,12 +120,12 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
         userInfo: [
           {
             name: 'qwer',
-            pwd: 'asdf'
+            pwd: 'asdf',
           },
           {
             name: 'zxcv',
-            pwd: '1234'
-          }
+            pwd: '1234',
+          },
         ],
         errorTest: [1, 2, 3, 4],
         code: ['asdf', 'qwer', 'zxcv'],
@@ -146,8 +146,8 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
         uu: 'niubi',
         select: 'aye',
         vihcle: '',
-        auto: 'yo'
-      })
+        auto: 'yo',
+      }),
     } as any) as state;
     // console.log(this.state);
     this.Form = DmForm(
@@ -157,7 +157,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
       {
         onSubmit(values: any) {
           console.log(values);
-        }
+        },
       }
       // {
       //   name: "global_state",
@@ -186,7 +186,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
 
   handleFormChange = (changedFields: any) => {
     this.setState((state: any) => ({
-      fields: { ...state.fields, ...changedFields }
+      fields: { ...state.fields, ...changedFields },
     }));
   };
 
@@ -194,27 +194,27 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
     const { time, fields } = this.state;
 
     // console.time('field2Obj');
-    const fieldName = field2Obj(this.state.fields, false);
+    // const fieldName = field2Obj(this.state.fields, false);
     // console.timeEnd('field2Obj');
     // console.log(fieldName, this.state.fields);
 
     return (
       <div style={{ width: '500px' }}>
         {time.format('YYYY-MM-DD HH:mm:ss')}
-        <this.Form {...fields} onChange={this.handleFormChange}>
+        {/* <this.Form {...fields} onChange={this.handleFormChange}>
           <div>
             {fieldName.userInfo.map((item: any, index: number) => {
               const prefix = item;
               return (
                 <div
                   style={{
-                    border: '1px solid red',
-                    marginBottom: '8px',
-                    padding: '8px'
+                    border: "1px solid red",
+                    marginBottom: "8px",
+                    padding: "8px"
                   }}
                 >
-                  <Input label="name" name={item.name} key={'$name'} />
-                  <Input label="pwd" name={item.pwd} key={'$pwd'} />
+                  <Input label="name" name={item.name} key={"$name"} />
+                  <Input label="pwd" name={item.pwd} key={"$pwd"} />
                 </div>
               );
             })}
@@ -225,9 +225,9 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               return (
                 <div
                   style={{
-                    border: '1px solid red',
-                    marginBottom: '8px',
-                    padding: '8px'
+                    border: "1px solid red",
+                    marginBottom: "8px",
+                    padding: "8px"
                   }}
                 >
                   <Input name={item} label={item} key={item} />
@@ -252,30 +252,30 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <FormItem
             label="test"
             style={{
-              textAlign: 'left'
+              textAlign: "left"
               // marginBottom: 0
             }}
           >
             <div
               style={{
-                border: '1px solid #ddd',
-                padding: '16px',
-                borderRadius: '4px',
-                backgroundColor: '#fafafa'
+                border: "1px solid #ddd",
+                padding: "16px",
+                borderRadius: "4px",
+                backgroundColor: "#fafafa"
               }}
             >
               <FormItem
                 label="test"
                 style={{
-                  textAlign: 'left',
+                  textAlign: "left",
                   marginBottom: 0
                 }}
               >
                 <Input
                   name="ayeaye"
                   style={{
-                    display: 'inline-block',
-                    width: '100px',
+                    display: "inline-block",
+                    width: "100px",
                     marginBottom: 0
                   }}
                 />
@@ -283,8 +283,8 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 <Input
                   name="nyeney"
                   style={{
-                    display: 'inline-block',
-                    width: '100px',
+                    display: "inline-block",
+                    width: "100px",
                     marginBottom: 0
                   }}
                 />
@@ -298,9 +298,9 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           </FormItem>
           <h2>hey</h2>
           {({ form: { getFieldDecorator } }: FormComponentProps) => (
-            <FormAntd.Item label={'自定义组件'}>
-              {getFieldDecorator('uu', {
-                rules: [{ required: true, message: 'Username is required!' }]
+            <FormAntd.Item label={"自定义组件"}>
+              {getFieldDecorator("uu", {
+                rules: [{ required: true, message: "Username is required!" }]
               })(<InputAntd />)}
             </FormAntd.Item>
           )}
@@ -312,53 +312,16 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
             label="坐骑"
             name="vihcle"
             options={[
-              { name: '灰机', value: 'airplane' },
-              { name: '火箭', value: 'rocket' }
+              { name: "灰机", value: "airplane" },
+              { name: "火箭", value: "rocket" }
             ]}
-          />{' '}
-          {this.state.fields.vihcle.value === 'rocket' && (
+          />{" "}
+          {this.state.fields.vihcle.value === "rocket" && (
             <Login name="tedst" type="username" />
           )}
-          {/* <CheckBox name="qewr" extra={<span>&nbsp;&nbsp;保存密码？</span>} /> */}
-          {/* <AutoBind
-            name="auto"
-            label="auto"
-            rules={[{ required: true, message: "需要输入这个" }]}
-            component={
-              <Input
-                name="youi"
-                addonBefore={
-                  <Select
-                    name="youiiiiii"
-                    style={{
-                      width: "35px",
-                      lineHeight: "32px",
-                      height: "32px",
-                      marginBottom: 0,
-                      margin: "-1px",
-                      transform: "translateY(-5px)"
-                    }}
-                  >
-                    <Option value="aye">aye</Option>
-                    <Option value="nye">nye</Option>
-                  </Select>
-                }
-              />
-            }
-            // component={({
-            //   form: { getFieldDecorator }
-            // }: FormComponentProps) => (
-            //   <FormAntd.Item label={'自定义组件'}>
-            //     {getFieldDecorator('uu', {
-            //       rules: [{ required: true, message: 'Username is required!' }]
-            //     })(<InputAntd />)}
-            //   </FormAntd.Item>
-            // )}
-          /> */}
           <Submit name="submit" />
         </this.Form>
-        {/* <MyForm ...myfield /> */}
-        <FormHook />
+        <FormHook /> */}
         <OneStepForm />
       </div>
     );
@@ -368,7 +331,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
 function FormHook() {
   const [formData, setFormData] = useFormState({
     text: '我是默认值',
-    yo: '我也是'
+    yo: '我也是',
   });
 
   const MyForm = useFormComponent(console.log);
@@ -390,24 +353,173 @@ function FormHook() {
   );
 }
 
-function OneStepForm() {
-  const { formData, MyForm, handleFormChange } = useOneStep(
+const init = {
+  userInfo: [
     {
-      text: '我是默认值',
-      yo: '我也是'
+      name: 'qwer',
+      pwd: 'asdf',
     },
-    console.log
-  );
+    {
+      name: 'zxcv',
+      pwd: '1234',
+    },
+  ],
+  errorTest: [1, 2, 3, 4],
+  code: ['asdf', 'qwer', 'zxcv'],
+  username: 'niubiguai',
+  password: '123456',
+  ayeaye: '12',
+  nyeney: '23',
+  ayeayehao: 'asdf',
+  test: 'qwer',
+  tedst: 'zxcv',
+  tedst2: '123',
+  qewr: true,
+  email: 'rewq',
+  date: [moment().startOf('day'), moment().endOf('day')],
+  emaild: 'niubi@163.com',
+  uu: 'niubi',
+  select: 'aye',
+  vihcle: '',
+  auto: 'yo',
+};
 
-  useEffect(() => {
-    console.log(field2Obj(formData));
-  }, [formData]);
-
-  return (
-    <MyForm onChange={handleFormChange} {...formData}>
-      <Input name="text" label="text" />
-      <Input name="yo" label="yo" />
-      <Submit name="submit" />
-    </MyForm>
+function OneStepForm() {
+  const { formData, MyForm, handleFormChange } = useOneStep(init, (val: any) =>
+    console.log(val)
   );
+  // console.time('field2Obj');
+  const fieldName = field2Obj(formData, false);
+  // console.timeEnd('field2Obj');
+  // useEffect(() => {
+  //   console.log(field2Obj(formData));
+  // }, [formData]);
+
+  const x = (() => {
+    // console.time("time");
+    const y = (
+      <MyForm onChange={handleFormChange} {...formData}>
+        <div>
+          {fieldName.userInfo.map((item: any, index: number) => {
+            const prefix = item;
+            return (
+              <div
+                key={item}
+                style={{
+                  border: '1px solid red',
+                  marginBottom: '8px',
+                  padding: '8px',
+                }}
+              >
+                <Input label="name" name={item.name} key={'$name'} />
+                <Input label="pwd" name={item.pwd} key={'$pwd'} />
+              </div>
+            );
+          })}
+        </div>
+        <div>
+          {fieldName.errorTest.map((item: any, index: number) => {
+            // console.log(item);
+            return (
+              <div
+                key={item}
+                style={{
+                  border: '1px solid red',
+                  marginBottom: '8px',
+                  padding: '8px',
+                }}
+              >
+                <Input name={item} label={item} key={item} />
+              </div>
+            );
+          })}
+        </div>
+        <Input name="username" label="牛逼" />
+        <div>
+          <div>
+            <Login
+              name="password"
+              type="password"
+              rules={[
+                {
+                  // validator
+                },
+              ]}
+            />
+          </div>
+        </div>
+        <FormItem
+          label="test"
+          style={{
+            textAlign: 'left',
+            // marginBottom: 0
+          }}
+        >
+          <div
+            style={{
+              border: '1px solid #ddd',
+              padding: '16px',
+              borderRadius: '4px',
+              backgroundColor: '#fafafa',
+            }}
+          >
+            <FormItem
+              label="test"
+              style={{
+                textAlign: 'left',
+                marginBottom: 0,
+              }}
+            >
+              <Input
+                name="ayeaye"
+                style={{
+                  display: 'inline-block',
+                  width: '100px',
+                  marginBottom: 0,
+                }}
+              />
+              &nbsp;-&nbsp;
+              <Input
+                name="nyeney"
+                style={{
+                  display: 'inline-block',
+                  width: '100px',
+                  marginBottom: 0,
+                }}
+              />
+              <Input name="ayeayehao" label="hao" style={{ marginBottom: 0 }} />
+            </FormItem>
+          </div>
+        </FormItem>
+        <h2>hey</h2>
+        {({ form: { getFieldDecorator } }: FormComponentProps) => (
+          <FormAntd.Item label={'自定义组件'}>
+            {getFieldDecorator('uu', {
+              rules: [{ required: true, message: 'Username is required!' }],
+            })(<InputAntd />)}
+          </FormAntd.Item>
+        )}
+        <Login name="test" type="username" />
+        <Login name="tedst" type="username" />
+        <DatePicker name="date" type="RangePicker" label="日期" />
+        <Input name="emaild" type="email" label="牛逼" />
+        <Radio
+          label="坐骑"
+          name="vihcle"
+          options={[
+            { name: '灰机', value: 'airplane' },
+            { name: '火箭', value: 'rocket' },
+          ]}
+        />{' '}
+        {formData.vihcle.value === 'rocket' && (
+          <Login name="tedst2" type="username" />
+        )}
+        <Submit name="submit" />
+      </MyForm>
+    );
+    // console.timeEnd("time");
+    return y;
+  })();
+
+  return x;
 }
