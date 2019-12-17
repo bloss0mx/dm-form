@@ -1,6 +1,6 @@
 # 🦉 Owl Form
 
-基于 antd Form 组件的增强组件。
+基于 Antd-Form 的增强组件。
 
 Owl-Form 谐音 our form，代表，这就是我们想要的 form 组件。同时也代表作者是个像猫头鹰一样昼伏夜出的生物。
 

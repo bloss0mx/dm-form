@@ -252,7 +252,7 @@ function _field2Obj(
   let keys = Object.keys(field);
   // const keys = Object.keys(field).sort((a, b) => a.localeCompare(b));
 
-  console.log(field, currName);
+  // console.log(field, currName);
 
   if (container.constructor === Array) {
     obj = [];
@@ -279,7 +279,7 @@ function _field2Obj(
     });
   let nextField = {} as any; // 下层容器
 
-  console.log(keys);
+  // console.log(keys);
 
   keys.forEach((v, index) => {
     const { curr, symbol, nextLevelName } = nameDealer(v);
@@ -357,7 +357,7 @@ function _field2Obj(
       }
     }
   });
-  console.log(field, obj);
+  // console.log(field, obj);
   return obj;
 }
 

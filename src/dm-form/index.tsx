@@ -344,7 +344,7 @@ function FormHook() {
   };
 
   useEffect(() => {
-    console.log(field2Obj(formData));
+    // console.log(field2Obj(formData));
   }, [formData]);
 
   return (
@@ -427,7 +427,7 @@ function OneStepForm() {
     // console.log(fieldName, l, r, _formData[l], _formData[r]);
     // setFormData(_formData);
 
-    console.log(fieldName);
+    // console.log(fieldName);
 
     const l = fieldName.list[before];
     const r = fieldName.list[after];
@@ -450,11 +450,12 @@ function OneStepForm() {
     // setFormData(_formData);
   };
 
-  console.log(fieldName);
+  // console.log(fieldName);
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
       <Input name="text" label="text" />
+      <h3>以下红框部分是可以拖动的</h3>
       <DndProvider backend={HTML5Backend}>
         {list.map((item: string, index: number) => (
           <Card item={item} index={index} key={item} afterSort={afterSort} />
@@ -508,20 +509,28 @@ function Card(props: { item: any; index: any; afterSort: any }) {
   });
 
   return ConnectDragPreview(
-    <div ref={drop} style={{ position: 'relative' }}>
+    <div
+      ref={drop}
+      style={{
+        position: 'relative',
+        border: '1px solid red',
+        marginBottom: '8px',
+        padding: '8px',
+      }}
+    >
       <span
         ref={drag}
         style={{
           display: 'inline-block',
           position: 'absolute',
           zIndex: 99,
-          left: '20px',
-          top: '8px',
+          left: '0px',
+          top: '0px',
         }}
       >
         三
       </span>
-      <Input key={item} name={item} label={'密码' + item} {...other} />
+      <Input key={item} name={item} label={'密码'} {...other} />
     </div>
   );
 }
@@ -556,18 +565,26 @@ function DoubleCard(props: { item: any; index: any; afterSort: any }) {
     }),
   });
 
-  console.log(item);
+  // console.log(item);
 
   return ConnectDragPreview(
-    <div ref={drop} style={{ position: 'relative' }}>
+    <div
+      ref={drop}
+      style={{
+        position: 'relative',
+        border: '1px solid red',
+        marginBottom: '8px',
+        padding: '8px',
+      }}
+    >
       <span
         ref={drag}
         style={{
           display: 'inline-block',
           position: 'absolute',
           zIndex: 99,
-          left: '20px',
-          top: '8px',
+          left: '0px',
+          top: '0px',
         }}
       >
         三
