@@ -2,6 +2,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Form as FormAntd, Input as InputAntd } from 'antd';
 import Form, { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
+import { useDrag, useDrop } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 
 import Login from './Login';
 import Input from './Input';
@@ -219,22 +222,21 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               );
             })}
           </div>
-          <div>
-            {fieldName.errorTest.map((item: any, index: number) => {
-              // console.log(item);
-              return (
-                <div
-                  style={{
-                    border: '1px solid red',
-                    marginBottom: '8px',
-                    padding: '8px'
-                  }}
-                >
-                  <Input name={item} label={item} key={item} />
-                </div>
-              );
-            })}
-          </div>
+          {fieldName.errorTest.map((item: any, index: number) => {
+            // console.log(item);
+            return (
+              <div
+                key={index + 'k'}
+                style={{
+                  border: '1px solid red',
+                  marginBottom: '8px',
+                  padding: '8px'
+                }}
+              >
+                <Input name={item} label={item} key={item} />
+              </div>
+            );
+          })}
           <Input name="username" label="牛逼" />
           <div>
             <div>
@@ -390,24 +392,126 @@ function FormHook() {
   );
 }
 
+const ItemTypes = {
+  CARD: 'card'
+};
+
+let dragBeginIndex: any;
+
+function resort<T extends any>(
+  before: number,
+  after: number,
+  array: Array<T>
+): Array<T> {
+  const _array = [...array];
+  const tmp = _array.splice(before, 1);
+  _array.splice(after, 0, tmp[0]);
+  return _array;
+}
+
+function setDragBeginIndex(index: number) {
+  dragBeginIndex = index;
+}
+
+/**
+ * OneStepForm
+ */
 function OneStepForm() {
-  const { formData, MyForm, handleFormChange } = useOneStep(
+  const { formData, setFormData, MyForm, handleFormChange } = useOneStep(
     {
       text: '我是默认值',
-      yo: '我也是'
+      yo: '我也是',
+      list: ' '
+        .repeat(30)
+        .split('')
+        .map((_, index) => `${index}`)
+        .sort((a: string, b: string) => parseInt(a) - parseInt(b))
+        .map(item => item + 'xxx'),
+      a: [{ b: 'str' }]
     },
     console.log
   );
 
-  useEffect(() => {
-    console.log(field2Obj(formData));
-  }, [formData]);
+  const fieldName = field2Obj(formData, false);
+  // const list = fieldName.list.sort((a: string, b: string) => {
+  //   return (
+  //     parseInt(a.replace(/[^\d]/g, '')) - parseInt(b.replace(/[^\d]/g, ''))
+  //   );
+  // });
+  const list = fieldName.list
+
+  const afterSort = (before: number, after: number) => {
+    const _formData = { ...formData };
+    const l = fieldName.list[before];
+    const r = fieldName.list[after];
+    const tmp = _formData[l].index;
+    _formData[l].index = _formData[r].index;
+    _formData[r].index = tmp;
+    console.log(fieldName, l, r, _formData[l], _formData[r]);
+    setFormData(_formData);
+  };
+
+  // console.log(fieldName);
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
       <Input name="text" label="text" />
-      <Input name="yo" label="yo" />
-      <Submit name="submit" />
+      <DndProvider backend={HTML5Backend}>
+        {list.map((item: string, index: number) => (
+          <Card item={item} index={index} key={item} afterSort={afterSort} />
+        ))}
+      </DndProvider>
+      {/* <Input name="yo" label="yo" />
+      <Submit name="submit" /> */}
     </MyForm>
+  );
+}
+
+function Card(props: { item: any; index: any; afterSort: any }) {
+  const { item, index, afterSort, ...other } = props;
+
+  const [{ isDragging }, drag, ConnectDragPreview] = useDrag({
+    item: { type: ItemTypes.CARD },
+    begin: () => {
+      setDragBeginIndex(index);
+    },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging()
+    })
+  });
+
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    drop: () => {
+      if (
+        dragBeginIndex !== undefined &&
+        index !== undefined &&
+        dragBeginIndex !== index
+      ) {
+        afterSort(dragBeginIndex, index);
+      }
+    },
+    collect: mon => ({
+      isOver: !!mon.isOver(),
+      canDrop: !!mon.canDrop()
+    })
+  });
+
+  return ConnectDragPreview(
+    <div ref={drop} style={{ position: 'relative' }}>
+      <span
+        ref={drag}
+        style={{
+          display: 'inline-block',
+          position: 'absolute',
+          zIndex: 99,
+          left: '20px',
+          top: '8px'
+        }}
+      >
+        三
+      </span>
+      <Input key={item} name={item} label={'密码' + item} {...other} />
+    </div>
   );
 }
