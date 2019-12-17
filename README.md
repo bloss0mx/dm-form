@@ -1,50 +1,113 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Owl Form
 
-## Available Scripts
+Owl Form 表单组件
 
-In the project directory, you can run:
+## 目标
 
-### `npm start`
+在使用 Antd 表单时，进行 form 双向绑定是件颇为麻烦的事。需要写大量重复的代码、配置。为了解放我的生产力，我打算做一个组件，只进行简单的配置，让它自己进行双向绑定。并提供一些常用的配置，尽量做到一行代码解决问题。
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. 自动双向绑定
+1. 简化配置和参数
+1. 提供一些常用的配置
+1. 保持足够的自由度
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+## 目前的做法
 
-### `npm test`
+为了写一个简单的登陆界面，需要写大量的代码，大量的配置。而且很多代码是重复的。
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+下面是 antd 官方例子：
 
-### `npm run build`
+```jsx
+import { Form, Icon, Input, Button, Checkbox } from 'antd';
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+class NormalLoginForm extends React.Component {
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log('Received values of form: ', values);
+      }
+    });
+  };
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+  render() {
+    const { getFieldDecorator } = this.props.form;
+    return (
+      <Form onSubmit={this.handleSubmit} className="login-form">
+        <Form.Item>
+          {getFieldDecorator('username', {
+            rules: [{ required: true, message: 'Please input your username!' }]
+          })(
+            <Input
+              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Username"
+            />
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('password', {
+            rules: [{ required: true, message: 'Please input your Password!' }]
+          })(
+            <Input
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              type="password"
+              placeholder="Password"
+            />
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('remember', {
+            valuePropName: 'checked',
+            initialValue: true
+          })(<Checkbox>Remember me</Checkbox>)}
+          <a className="login-form-forgot" href="">
+            Forgot password
+          </a>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="login-form-button"
+          >
+            Log in
+          </Button>
+          Or <a href="">register now!</a>
+        </Form.Item>
+      </Form>
+    );
+  }
+}
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 理想的情况
 
-### `npm run eject`
+在 hook 里面只需要简单的 use OwlForm 的`useOneStep`就能实现相同的效果。
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```jsx
+import React, { useEffect } from 'react';
+import DmForm, { field2Obj, useOneStep } from 'owlForm';
+import { Submit, Login } from 'owlForm';
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+function OneStepForm() {
+  const { formData, MyForm, handleFormChange } = useOneStep(
+    {
+      text: '我是默认值',
+      yo: '我也是'
+    },
+    console.log
+  );
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  return (
+    <MyForm onChange={handleFormChange} {...formData}>
+      <Login name="name" label="用户名" type="username" />
+      <Login name="pwd" label="密码" type="username" />
+      <Submit name="submit" />
+    </MyForm>
+  );
+}
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 优点
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-## NOTICE
-
-现在已知的“问题”：
-
-1. 如果使用了 rules，会触发 onchange 两次，但是 mapPropsToFields 只触发一次（thankfully）
+1. 代码简短
+1. 常用的情况可以抽成组件，一次编码各处使用
+1.

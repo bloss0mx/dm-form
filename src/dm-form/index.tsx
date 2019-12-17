@@ -2,6 +2,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Form as FormAntd, Input as InputAntd } from 'antd';
 import Form, { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
+import { useDrag, useDrop } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 
 import Login from './Login';
 import Input from './Input';
@@ -194,14 +197,14 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
     const { time, fields } = this.state;
 
     // console.time('field2Obj');
-    // const fieldName = field2Obj(this.state.fields, false);
+    const fieldName = field2Obj(this.state.fields, false);
     // console.timeEnd('field2Obj');
     // console.log(fieldName, this.state.fields);
 
     return (
       <div style={{ width: '500px' }}>
         {time.format('YYYY-MM-DD HH:mm:ss')}
-        {/* <this.Form {...fields} onChange={this.handleFormChange}>
+        <this.Form {...fields} onChange={this.handleFormChange}>
           <div>
             {fieldName.userInfo.map((item: any, index: number) => {
               const prefix = item;
@@ -219,22 +222,21 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               );
             })}
           </div>
-          <div>
-            {fieldName.errorTest.map((item: any, index: number) => {
-              // console.log(item);
-              return (
-                <div
-                  style={{
-                    border: "1px solid red",
-                    marginBottom: "8px",
-                    padding: "8px"
-                  }}
-                >
-                  <Input name={item} label={item} key={item} />
-                </div>
-              );
-            })}
-          </div>
+          {fieldName.errorTest.map((item: any, index: number) => {
+            // console.log(item);
+            return (
+              <div
+                key={index + 'k'}
+                style={{
+                  border: '1px solid red',
+                  marginBottom: '8px',
+                  padding: '8px'
+                }}
+              >
+                <Input name={item} label={item} key={item} />
+              </div>
+            );
+          })}
           <Input name="username" label="牛逼" />
           <div>
             <div>
@@ -321,7 +323,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           )}
           <Submit name="submit" />
         </this.Form>
-        <FormHook /> */}
+        <FormHook />
         <OneStepForm />
       </div>
     );
@@ -353,173 +355,122 @@ function FormHook() {
   );
 }
 
-const init = {
-  userInfo: [
-    {
-      name: 'qwer',
-      pwd: 'asdf',
-    },
-    {
-      name: 'zxcv',
-      pwd: '1234',
-    },
-  ],
-  errorTest: [1, 2, 3, 4],
-  code: ['asdf', 'qwer', 'zxcv'],
-  username: 'niubiguai',
-  password: '123456',
-  ayeaye: '12',
-  nyeney: '23',
-  ayeayehao: 'asdf',
-  test: 'qwer',
-  tedst: 'zxcv',
-  tedst2: '123',
-  qewr: true,
-  email: 'rewq',
-  date: [moment().startOf('day'), moment().endOf('day')],
-  emaild: 'niubi@163.com',
-  uu: 'niubi',
-  select: 'aye',
-  vihcle: '',
-  auto: 'yo',
+const ItemTypes = {
+  CARD: 'card',
 };
 
+let dragBeginIndex: any;
+
+function resort<T extends any>(
+  before: number,
+  after: number,
+  array: Array<T>
+): Array<T> {
+  const _array = [...array];
+  const tmp = _array.splice(before, 1);
+  _array.splice(after, 0, tmp[0]);
+  return _array;
+}
+
+function setDragBeginIndex(index: number) {
+  dragBeginIndex = index;
+}
+
+/**
+ * OneStepForm
+ */
 function OneStepForm() {
-  const { formData, MyForm, handleFormChange } = useOneStep(init, (val: any) =>
-    console.log(val)
-  );
-  // console.time('field2Obj');
+  const { formData, setFormData, MyForm, handleFormChange } = useOneStep({
+    text: '我是默认值',
+    yo: '我也是',
+    list: ' '
+      .repeat(30)
+      .split('')
+      .map((_, index) => `${index}`)
+      .sort((a: string, b: string) => parseInt(a) - parseInt(b))
+      .map(item => item + 'xxx'),
+    a: [{ b: 'str' }],
+  });
   const fieldName = field2Obj(formData, false);
-  // console.timeEnd('field2Obj');
-  // useEffect(() => {
-  //   console.log(field2Obj(formData));
-  // }, [formData]);
+  // const list = fieldName.list.sort((a: string, b: string) => {
+  //   return (
+  //     parseInt(a.replace(/[^\d]/g, '')) - parseInt(b.replace(/[^\d]/g, ''))
+  //   );
+  // });
+  const list = fieldName.list;
 
-  const x = (() => {
-    // console.time("time");
-    const y = (
-      <MyForm onChange={handleFormChange} {...formData}>
-        <div>
-          {fieldName.userInfo.map((item: any, index: number) => {
-            const prefix = item;
-            return (
-              <div
-                key={item}
-                style={{
-                  border: '1px solid red',
-                  marginBottom: '8px',
-                  padding: '8px',
-                }}
-              >
-                <Input label="name" name={item.name} key={'$name'} />
-                <Input label="pwd" name={item.pwd} key={'$pwd'} />
-              </div>
-            );
-          })}
-        </div>
-        <div>
-          {fieldName.errorTest.map((item: any, index: number) => {
-            // console.log(item);
-            return (
-              <div
-                key={item}
-                style={{
-                  border: '1px solid red',
-                  marginBottom: '8px',
-                  padding: '8px',
-                }}
-              >
-                <Input name={item} label={item} key={item} />
-              </div>
-            );
-          })}
-        </div>
-        <Input name="username" label="牛逼" />
-        <div>
-          <div>
-            <Login
-              name="password"
-              type="password"
-              rules={[
-                {
-                  // validator
-                },
-              ]}
-            />
-          </div>
-        </div>
-        <FormItem
-          label="test"
-          style={{
-            textAlign: 'left',
-            // marginBottom: 0
-          }}
-        >
-          <div
-            style={{
-              border: '1px solid #ddd',
-              padding: '16px',
-              borderRadius: '4px',
-              backgroundColor: '#fafafa',
-            }}
-          >
-            <FormItem
-              label="test"
-              style={{
-                textAlign: 'left',
-                marginBottom: 0,
-              }}
-            >
-              <Input
-                name="ayeaye"
-                style={{
-                  display: 'inline-block',
-                  width: '100px',
-                  marginBottom: 0,
-                }}
-              />
-              &nbsp;-&nbsp;
-              <Input
-                name="nyeney"
-                style={{
-                  display: 'inline-block',
-                  width: '100px',
-                  marginBottom: 0,
-                }}
-              />
-              <Input name="ayeayehao" label="hao" style={{ marginBottom: 0 }} />
-            </FormItem>
-          </div>
-        </FormItem>
-        <h2>hey</h2>
-        {({ form: { getFieldDecorator } }: FormComponentProps) => (
-          <FormAntd.Item label={'自定义组件'}>
-            {getFieldDecorator('uu', {
-              rules: [{ required: true, message: 'Username is required!' }],
-            })(<InputAntd />)}
-          </FormAntd.Item>
-        )}
-        <Login name="test" type="username" />
-        <Login name="tedst" type="username" />
-        <DatePicker name="date" type="RangePicker" label="日期" />
-        <Input name="emaild" type="email" label="牛逼" />
-        <Radio
-          label="坐骑"
-          name="vihcle"
-          options={[
-            { name: '灰机', value: 'airplane' },
-            { name: '火箭', value: 'rocket' },
-          ]}
-        />{' '}
-        {formData.vihcle.value === 'rocket' && (
-          <Login name="tedst2" type="username" />
-        )}
-        <Submit name="submit" />
-      </MyForm>
-    );
-    // console.timeEnd("time");
-    return y;
-  })();
+  const afterSort = (before: number, after: number) => {
+    const _formData = { ...formData };
+    const l = fieldName.list[before];
+    const r = fieldName.list[after];
+    const tmp = _formData[l].index;
+    _formData[l].index = _formData[r].index;
+    _formData[r].index = tmp;
+    console.log(fieldName, l, r, _formData[l], _formData[r]);
+    setFormData(_formData);
+  };
 
-  return x;
+  // console.log(fieldName);
+
+  return (
+    <MyForm onChange={handleFormChange} {...formData}>
+      <Input name="text" label="text" />
+      <DndProvider backend={HTML5Backend}>
+        {list.map((item: string, index: number) => (
+          <Card item={item} index={index} key={item} afterSort={afterSort} />
+        ))}
+      </DndProvider>
+      <Input name="yo" label="yo" />
+      <Submit name="submit" />
+    </MyForm>
+  );
+}
+
+function Card(props: { item: any; index: any; afterSort: any }) {
+  const { item, index, afterSort, ...other } = props;
+
+  const [{ isDragging }, drag, ConnectDragPreview] = useDrag({
+    item: { type: ItemTypes.CARD },
+    begin: () => {
+      setDragBeginIndex(index);
+    },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    drop: () => {
+      if (
+        dragBeginIndex !== undefined &&
+        index !== undefined &&
+        dragBeginIndex !== index
+      ) {
+        afterSort(dragBeginIndex, index);
+      }
+    },
+    collect: mon => ({
+      isOver: !!mon.isOver(),
+      canDrop: !!mon.canDrop(),
+    }),
+  });
+
+  return ConnectDragPreview(
+    <div ref={drop} style={{ position: 'relative' }}>
+      <span
+        ref={drag}
+        style={{
+          display: 'inline-block',
+          position: 'absolute',
+          zIndex: 99,
+          left: '20px',
+          top: '8px',
+        }}
+      >
+        三
+      </span>
+      <Input key={item} name={item} label={'密码' + item} {...other} />
+    </div>
+  );
 }

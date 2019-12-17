@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Form } from "antd";
-import { FormComponentProps, FormCreateOption } from "antd/es/form";
-import { content } from "./formChildrenDealer";
-import { FormProps, value } from "./formChildrenDealer";
+import React, { useEffect, useState, useMemo, ReactText } from 'react';
+import { Form } from 'antd';
+import { FormComponentProps, FormCreateOption } from 'antd/es/form';
+import { content } from './formChildrenDealer';
+import { FormProps, value } from './formChildrenDealer';
 
 interface FormOnly<T> {
   onSubmit: (values: T) => value;
@@ -119,7 +119,7 @@ export const useOneStep = (initState?: any, onSubmit?: Function) => {
   // console.timeEnd('useOneStep3');
   return {
     formData,
-    // setFormData,
+    setFormData,
     MyForm,
     handleFormChange
   };
@@ -159,7 +159,7 @@ type FieldToState2<T> = {
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
-      };
+      }
 };
 type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
@@ -192,24 +192,25 @@ export function genHash() {
  * @param obj
  * @param preName
  */
-export function obj2Field(obj: any, preName = "") {
+export function obj2Field(obj: any, preName = '', index?: ReactText) {
   let data = {} as any;
   if (obj.constructor === Array) {
     const preFix = preName === "" ? "" : preName + "_";
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
-        data = { ...data, ...obj2Field(obj[v], preFix + genHash()) };
+        // console.log(v);
+        data = { ...data, ...obj2Field(obj[v], preFix + genHash(), v) };
       }
     }
   } else if (obj.constructor === Object) {
     const preFix = preName === "" ? "" : preName + "$";
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
-        data = { ...data, ...obj2Field(obj[v], preFix + v) };
+        data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
       }
     }
   } else {
-    data[preName] = { value: obj };
+    data[preName] = { value: obj, index };
   }
   return data;
 }
@@ -245,13 +246,29 @@ function _field2Obj(
   currName = ""
 ) {
   let obj: any; // 本层容器
-  const keys = Object.keys(field).sort((a, b) => a.localeCompare(b));
+  let keys = Object.keys(field);
+  // const keys = Object.keys(field).sort((a, b) => a.localeCompare(b));
+
+  console.log(field);
+
   if (container.constructor === Array) {
     obj = [];
+    const list = [] as Array<any>;
+    keys.forEach((item, index) => {
+      console.log(item);
+      list.push({ ...field[item], name: item, _index: index });
+    });
+    console.log(list);
+    const _list = list.sort((a: { index: string }, b: { index: string }) => {
+      return parseInt(a.index) - parseInt(b.index);
+    });
+    keys = _list.map(item => item.name);
   } else if (container.constructor === Object) {
     obj = {};
   }
   let nextField = {} as any; // 下层容器
+
+  console.log(keys);
 
   keys.forEach((v, index) => {
     const { curr, symbol, nextLevelName } = nameDealer(v);
@@ -300,11 +317,13 @@ function _field2Obj(
         if (obj.constructor === Array && field[v]) obj.push(field[v]);
         else if (obj.constructor === Object && field[v]) obj[curr] = field[v];
       } else {
+        console.log(currName, curr, currName + curr);
         if (obj.constructor === Array) obj.push(currName + curr);
         else if (obj.constructor === Object) obj[curr] = currName + curr;
       }
     }
   });
+  console.log(field, obj);
   return obj;
 }
 
@@ -314,7 +333,6 @@ function _field2Obj(
  * @param getValue 为true将filed转换为js对象，为false时输出以js对象的方式输出field中的名字
  */
 export function field2Obj(field: any, getValue: boolean = true) {
-  // console.warn(field);
   return _field2Obj(field, getValue);
 }
 
