@@ -1,6 +1,8 @@
-# Owl Form
+# 🦉 Owl Form
 
-Owl Form 表单组件
+基于 antd Form 组件的增强组件。
+
+Owl-Form 谐音 our form，代表，这就是我们想要的 form 组件。同时也代表作者是个像猫头鹰一样昼伏夜出的生物。
 
 ## 目标
 
@@ -10,6 +12,7 @@ Owl Form 表单组件
 1. 简化配置和参数
 1. 提供一些常用的配置
 1. 保持足够的自由度
+1. 支持一定程度的扩展
 
 ## 目前的做法
 
@@ -36,7 +39,7 @@ class NormalLoginForm extends React.Component {
       <Form onSubmit={this.handleSubmit} className="login-form">
         <Form.Item>
           {getFieldDecorator('username', {
-            rules: [{ required: true, message: 'Please input your username!' }]
+            rules: [{ required: true, message: 'Please input your username!' }],
           })(
             <Input
               prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -46,7 +49,7 @@ class NormalLoginForm extends React.Component {
         </Form.Item>
         <Form.Item>
           {getFieldDecorator('password', {
-            rules: [{ required: true, message: 'Please input your Password!' }]
+            rules: [{ required: true, message: 'Please input your Password!' }],
           })(
             <Input
               prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -58,7 +61,7 @@ class NormalLoginForm extends React.Component {
         <Form.Item>
           {getFieldDecorator('remember', {
             valuePropName: 'checked',
-            initialValue: true
+            initialValue: true,
           })(<Checkbox>Remember me</Checkbox>)}
           <a className="login-form-forgot" href="">
             Forgot password
@@ -91,7 +94,7 @@ function OneStepForm() {
   const { formData, MyForm, handleFormChange } = useOneStep(
     {
       text: '我是默认值',
-      yo: '我也是'
+      yo: '我也是',
     },
     console.log
   );
@@ -108,6 +111,47 @@ function OneStepForm() {
 
 ## 优点
 
-1. 代码简短
+1. 代码简短，尽可能的自由，且符合直觉
 1. 常用的情况可以抽成组件，一次编码各处使用
-1.
+1. 支持 react-dnd
+1. 性能与 antd 自带的 form 组件相当
+
+## 通过 hook 使用
+
+使用`useOneStep`来初始化 Form
+
+```javascript
+const {
+  formData,
+  setFormData,
+  MyForm,
+  handleFormChange,
+  fieldName,
+} = useOneStep(
+  {
+    defaultVal: '我是默认值',
+    defaultText: '我也是',
+  },
+  function(formData) {
+    console.log(formData);
+  }
+);
+```
+
+`useOneStep`接受两个参数，第一个是初始值对象，第二个是`onSubmit`回调。
+
+- 初始值对象：可以是基本类型变量，也可以是 object 或 array。
+- onSubmit 回调：调用时，返回处理好的值，类型和初始化对象相同。
+
+`useOneStep`返回 5 个变量：`formData`、`setFormData`、`MyForm`、`handleFormChange`、`fieldName`
+
+- `formData`：当前处理中的值，**_需要作为参数放入 MyForm 组件_**。一般不建议直接使用，由于 owl-form 内部会把对象扁平化，所以可能也不利于直接使用。
+- `setFormData`：直接操纵值，和 formData 一样，不建议直接使用，如果需要使用，我会在文档中明确标识。
+- `MyForm`：组件本体，**_需要放入 render 中以显示_**。通常只需要写`<MyForm onChange={handleFormChange} {...formData} ></MyForm>`，就可以了。
+- `handleFormChange`：处理表单变化函数。**_需要作为参数放入 MyForm 组件_**。
+- `fieldName`：表单结构对象。由于表单在 owl-form 中被处理成不太好理解的格式，所以在处理复杂表单时，建议直接使用 fieldName，来展开数组或对象。
+
+## TODO
+
+1. 严格处理各种类型问题
+1. 单元测试

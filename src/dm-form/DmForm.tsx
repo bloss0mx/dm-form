@@ -103,7 +103,7 @@ export const useFormComponent = (onSubmit?: Function) => {
  * @param initState 默认值
  * @param onSubmit onsubmit事件
  */
-export const useOneStep = (initState?: any, onSubmit?: Function) => {
+export function useOneStep(initState?: any, onSubmit?: Function) {
   // console.time('useOneStep1');
   const [formData, setFormData] = useFormState(initState || {});
   // console.timeEnd('useOneStep1');
@@ -124,7 +124,7 @@ export const useOneStep = (initState?: any, onSubmit?: Function) => {
     handleFormChange,
     fieldName: field2Obj(formData, false),
   };
-};
+}
 
 /**
  * 表单工厂
