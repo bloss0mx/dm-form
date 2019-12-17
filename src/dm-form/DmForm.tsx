@@ -21,12 +21,12 @@ function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
 
     handleSubmit(e: React.FormEvent<HTMLFormElement>) {
       const {
-        form: { validateFields }
+        form: { validateFields },
       } = this.props;
       e.preventDefault();
       validateFields((err: string, values: T) => {
         if (!err) {
-          if (actions) actions.onSubmit(_field2Obj(values, "onSubmit"));
+          if (actions) actions.onSubmit(_field2Obj(values, 'onSubmit'));
         }
       });
     }
@@ -37,11 +37,11 @@ function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
         <Form
           labelCol={{
             xs: { span: 24 },
-            sm: { span: 6 }
+            sm: { span: 6 },
           }}
           wrapperCol={{
             xs: { span: 24 },
-            sm: { span: 18 }
+            sm: { span: 18 },
           }}
           onSubmit={this.handleSubmit}
         >
@@ -57,7 +57,7 @@ export function beforeUseForm<T>(onSubmit?: Function) {
   // let _setFiled: Function = () => {};
   // let _onSubmit: Function = () => {};
   return Form.create({
-    name: "global_state",
+    name: 'global_state',
     onFieldsChange(props: any, changedFields: any) {
       (props as any).onChange(changedFields);
     },
@@ -65,14 +65,14 @@ export function beforeUseForm<T>(onSubmit?: Function) {
       // console.time('mapPropsToFields');
       const t: any = {};
       for (const i in props) {
-        if (props.hasOwnProperty(i) && i !== "children") {
+        if (props.hasOwnProperty(i) && i !== 'children') {
           t[i] = Form.createFormField({ ...props[i] });
         }
       }
       // console.timeEnd('mapPropsToFields');
       return t;
     },
-    onValuesChange(_: any, values: any) {}
+    onValuesChange(_: any, values: any) {},
   })(Init({ onSubmit } as any));
   // function(initialState: T, onSubmit: Function) {
   //   const [field, setfield] = useState(initialState);
@@ -121,7 +121,8 @@ export const useOneStep = (initState?: any, onSubmit?: Function) => {
     formData,
     setFormData,
     MyForm,
-    handleFormChange
+    handleFormChange,
+    fieldName: field2Obj(formData, false),
   };
 };
 
@@ -136,20 +137,20 @@ export default function DmFormFactory<T>(
   // FormCreateOption?: FormCreateOption<any>
 ) {
   return Form.create({
-    name: "global_state",
+    name: 'global_state',
     onFieldsChange(props: any, changedFields: any) {
       (props as any).onChange(changedFields);
     },
     mapPropsToFields(props: any) {
       const t: any = {};
       for (const i in props) {
-        if (props.hasOwnProperty(i) && i !== "children") {
+        if (props.hasOwnProperty(i) && i !== 'children') {
           t[i] = Form.createFormField({ ...props[i] });
         }
       }
       return t;
     },
-    onValuesChange(_: any, values: any) {}
+    onValuesChange(_: any, values: any) {},
   })(Init(actions));
 }
 
@@ -159,7 +160,7 @@ type FieldToState2<T> = {
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
-      }
+      };
 };
 type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
@@ -195,7 +196,7 @@ export function genHash() {
 export function obj2Field(obj: any, preName = '', index?: ReactText) {
   let data = {} as any;
   if (obj.constructor === Array) {
-    const preFix = preName === "" ? "" : preName + "_";
+    const preFix = preName === '' ? '' : preName + '_';
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         // console.log(v);
@@ -203,7 +204,7 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
       }
     }
   } else if (obj.constructor === Object) {
-    const preFix = preName === "" ? "" : preName + "$";
+    const preFix = preName === '' ? '' : preName + '$';
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
@@ -219,18 +220,20 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
  * 按层获取path信息
  * @param name
  */
-function nameDealer(name = "") {
+function nameDealer(name = '') {
   const curr = name.match(/^[^_\$]+/);
-  const rmedCurr = name.replace(/^[^_\$]+/, "");
+  const rmedCurr = name.replace(/^[^_\$]+/, '');
   const symbol = rmedCurr.match(/^[_\$]/);
-  const nextLevelName = rmedCurr.replace(/^[_\$]/, "");
+  const nextLevelName = rmedCurr.replace(/^[_\$]/, '');
   return {
     name,
-    curr: (curr && curr[0]) || "",
+    curr: (curr && curr[0]) || '',
     symbol: symbol && symbol[0],
-    nextLevelName
+    nextLevelName,
   };
 }
+
+const indexName = '__idx__';
 
 /**
  * field转换为对象
@@ -241,57 +244,89 @@ function nameDealer(name = "") {
  */
 function _field2Obj(
   field: any,
-  getValue: boolean | "onSubmit",
+  getValue: boolean | 'onSubmit',
   container = {},
-  currName = ""
+  currName = ''
 ) {
   let obj: any; // 本层容器
   let keys = Object.keys(field);
   // const keys = Object.keys(field).sort((a, b) => a.localeCompare(b));
 
-  console.log(field);
+  console.log(field, currName);
 
   if (container.constructor === Array) {
     obj = [];
-    const list = [] as Array<any>;
-    keys.forEach((item, index) => {
-      console.log(item);
-      list.push({ ...field[item], name: item, _index: index });
-    });
-    console.log(list);
-    const _list = list.sort((a: { index: string }, b: { index: string }) => {
-      return parseInt(a.index) - parseInt(b.index);
-    });
-    keys = _list.map(item => item.name);
+    // 以下部分是field寄存index信息的操作，考虑废弃
+    // const list = [] as Array<any>;
+    // keys.forEach((item, index) => {
+    //   console.log(item);
+    //   list.push({ ...field[item], name: item, _index: index });
+    // });
+    // console.log(list);
+    // const _list = list.sort((a: { index: string }, b: { index: string }) => {
+    //   return parseInt(a.index) - parseInt(b.index);
+    // });
+    // keys = _list.map(item => item.name);
   } else if (container.constructor === Object) {
     obj = {};
   }
+  if (!getValue)
+    Object.defineProperty(obj, indexName, {
+      enumerable: false,
+      configurable: false,
+      writable: true,
+      value: currName,
+    });
   let nextField = {} as any; // 下层容器
 
   console.log(keys);
 
   keys.forEach((v, index) => {
     const { curr, symbol, nextLevelName } = nameDealer(v);
-    const nextCurr = nameDealer(keys[index + 1] || "").curr;
-    if (symbol && symbol !== "value") {
+    const nextCurr = nameDealer(keys[index + 1] || '').curr;
+    if (symbol && symbol !== 'value') {
       // 有后继 深入
       nextField[nextLevelName] = field[v];
       if (curr !== nextCurr || index === keys.length - 1) {
         // 本层不同
-        if (symbol === "$") {
+        if (symbol === '$') {
           // 对象
-          if (obj.constructor === Array)
-            obj.push(
-              _field2Obj(nextField, getValue, {}, currName + curr + symbol)
+          if (obj.constructor === Array) {
+            const target = _field2Obj(
+              nextField,
+              getValue,
+              {},
+              currName + curr + symbol
             );
-          else if (obj.constructor === Object) {
+            if (!getValue)
+              Object.defineProperty(target, indexName, {
+                enumerable: false,
+                configurable: false,
+                writable: true,
+                value: currName + curr,
+              });
+            obj.push(target);
+          } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = {};
+            const target = _field2Obj(
+              nextField,
+              getValue,
+              {},
+              currName + curr + symbol
+            );
+            if (!getValue)
+              Object.defineProperty(target, indexName, {
+                enumerable: false,
+                configurable: false,
+                writable: true,
+                value: currName + curr,
+              });
             obj[curr] = {
               ...obj[curr],
-              ..._field2Obj(nextField, getValue, {}, currName + curr + symbol)
+              ...target,
             };
           }
-        } else if (symbol === "_") {
+        } else if (symbol === '_') {
           // 数组
           if (obj.constructor === Array)
             obj.push(
@@ -301,7 +336,7 @@ function _field2Obj(
             if (obj[curr] === undefined) obj[curr] = [];
             obj[curr] = [
               ...obj[curr],
-              ..._field2Obj(nextField, getValue, [], currName + curr + symbol)
+              ..._field2Obj(nextField, getValue, [], currName + curr + symbol),
             ];
           }
         }
@@ -313,11 +348,10 @@ function _field2Obj(
         if (obj.constructor === Array && field[v]) obj.push(field[v].value);
         else if (obj.constructor === Object && field[v])
           obj[curr] = field[v].value;
-      } else if (getValue === "onSubmit") {
+      } else if (getValue === 'onSubmit') {
         if (obj.constructor === Array && field[v]) obj.push(field[v]);
         else if (obj.constructor === Object && field[v]) obj[curr] = field[v];
       } else {
-        console.log(currName, curr, currName + curr);
         if (obj.constructor === Array) obj.push(currName + curr);
         else if (obj.constructor === Object) obj[curr] = currName + curr;
       }
@@ -344,19 +378,19 @@ export function field2Obj(field: any, getValue: boolean = true) {
 export function list(list: any, prefix: string) {
   const keys1 = Object.keys(list)
     .sort((a, b) => a.localeCompare(b))
-    .filter(item => item.match(new RegExp("^" + prefix)));
+    .filter(item => item.match(new RegExp('^' + prefix)));
 
   return ([{ curr: undefined, answer: [] }, ...keys1] as any).reduce(
     (sum: any, item: any) => {
       const newSum = { ...sum };
-      const matched1st = item.replace(new RegExp("^" + prefix + "[$_]"), "");
-      const matched2nd = matched1st.replace(/^[^$_]+/, "").match(/^[$]/);
+      const matched1st = item.replace(new RegExp('^' + prefix + '[$_]'), '');
+      const matched2nd = matched1st.replace(/^[^$_]+/, '').match(/^[$]/);
       if (
         (matched1st && matched1st.match(/^[^$_]+/)[0] !== newSum.curr) ||
         newSum.curr === undefined
       ) {
         newSum.curr = item
-          .replace(new RegExp("^" + prefix + "[$_]"), "")
+          .replace(new RegExp('^' + prefix + '[$_]'), '')
           .match(/^[^$_]+/)[0];
         if (matched2nd) newSum.answer = [...sum.answer, []];
       }
@@ -364,10 +398,41 @@ export function list(list: any, prefix: string) {
       if (matched2nd) {
         newSum.answer[newSum.answer.length - 1] = [
           ...newSum.answer[newSum.answer.length - 1],
-          item
+          item,
         ];
       } else newSum.answer = [...sum.answer, item];
       return newSum;
     }
   ).answer;
+}
+
+function splitName(wholeName: string, prefix: string) {
+  const subName = wholeName.replace(new RegExp('^' + prefix), '');
+  const index = prefix.match(/\d+$/);
+  const _prefix = prefix.replace(/\d+$/, '');
+  return [_prefix, index, subName];
+}
+
+export function formSort(l: any, r: any, formData: any) {
+  const _formData = { ...formData };
+
+  const leftPrefix = l.__idx__;
+  const rightPrefix = r.__idx__;
+  if (leftPrefix !== undefined && rightPrefix !== undefined) {
+    const leftIndex = leftPrefix.match(/\d+$/);
+    const rightIndex = rightPrefix.match(/\d+$/);
+    Object.keys(_formData).forEach(item => {
+      if (item.match(new RegExp('^' + leftPrefix))) {
+        const [pre, mid, end] = splitName(item, leftPrefix);
+        const tmp = _formData[pre + leftIndex + end];
+        _formData[pre + leftIndex + end] = _formData[pre + rightIndex + end];
+        _formData[pre + rightIndex + end] = tmp;
+      }
+    });
+  } else {
+    const tmp = _formData[l];
+    _formData[l] = _formData[r];
+    _formData[r] = tmp;
+  }
+  return _formData;
 }

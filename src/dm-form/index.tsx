@@ -18,6 +18,7 @@ import DmForm, {
   useFormState,
   useFormComponent,
   useOneStep,
+  formSort,
 } from './DmForm';
 import Submit from './Submit';
 import CheckBox from './CheckBox';
@@ -211,13 +212,13 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
               return (
                 <div
                   style={{
-                    border: "1px solid red",
-                    marginBottom: "8px",
-                    padding: "8px"
+                    border: '1px solid red',
+                    marginBottom: '8px',
+                    padding: '8px',
                   }}
                 >
-                  <Input label="name" name={item.name} key={"$name"} />
-                  <Input label="pwd" name={item.pwd} key={"$pwd"} />
+                  <Input label="name" name={item.name} key={'$name'} />
+                  <Input label="pwd" name={item.pwd} key={'$pwd'} />
                 </div>
               );
             })}
@@ -230,7 +231,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 style={{
                   border: '1px solid red',
                   marginBottom: '8px',
-                  padding: '8px'
+                  padding: '8px',
                 }}
               >
                 <Input name={item} label={item} key={item} />
@@ -246,7 +247,7 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
                 rules={[
                   {
                     // validator
-                  }
+                  },
                 ]}
               />
             </div>
@@ -254,40 +255,40 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           <FormItem
             label="test"
             style={{
-              textAlign: "left"
+              textAlign: 'left',
               // marginBottom: 0
             }}
           >
             <div
               style={{
-                border: "1px solid #ddd",
-                padding: "16px",
-                borderRadius: "4px",
-                backgroundColor: "#fafafa"
+                border: '1px solid #ddd',
+                padding: '16px',
+                borderRadius: '4px',
+                backgroundColor: '#fafafa',
               }}
             >
               <FormItem
                 label="test"
                 style={{
-                  textAlign: "left",
-                  marginBottom: 0
+                  textAlign: 'left',
+                  marginBottom: 0,
                 }}
               >
                 <Input
                   name="ayeaye"
                   style={{
-                    display: "inline-block",
-                    width: "100px",
-                    marginBottom: 0
+                    display: 'inline-block',
+                    width: '100px',
+                    marginBottom: 0,
                   }}
                 />
                 &nbsp;-&nbsp;
                 <Input
                   name="nyeney"
                   style={{
-                    display: "inline-block",
-                    width: "100px",
-                    marginBottom: 0
+                    display: 'inline-block',
+                    width: '100px',
+                    marginBottom: 0,
                   }}
                 />
                 <Input
@@ -300,9 +301,9 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
           </FormItem>
           <h2>hey</h2>
           {({ form: { getFieldDecorator } }: FormComponentProps) => (
-            <FormAntd.Item label={"自定义组件"}>
-              {getFieldDecorator("uu", {
-                rules: [{ required: true, message: "Username is required!" }]
+            <FormAntd.Item label={'自定义组件'}>
+              {getFieldDecorator('uu', {
+                rules: [{ required: true, message: 'Username is required!' }],
               })(<InputAntd />)}
             </FormAntd.Item>
           )}
@@ -314,11 +315,11 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
             label="坐骑"
             name="vihcle"
             options={[
-              { name: "灰机", value: "airplane" },
-              { name: "火箭", value: "rocket" }
+              { name: '灰机', value: 'airplane' },
+              { name: '火箭', value: 'rocket' },
             ]}
-          />{" "}
-          {this.state.fields.vihcle.value === "rocket" && (
+          />{' '}
+          {this.state.fields.vihcle.value === 'rocket' && (
             <Login name="tedst" type="username" />
           )}
           <Submit name="submit" />
@@ -380,37 +381,76 @@ function setDragBeginIndex(index: number) {
  * OneStepForm
  */
 function OneStepForm() {
-  const { formData, setFormData, MyForm, handleFormChange } = useOneStep({
-    text: '我是默认值',
-    yo: '我也是',
-    list: ' '
-      .repeat(30)
-      .split('')
-      .map((_, index) => `${index}`)
-      .sort((a: string, b: string) => parseInt(a) - parseInt(b))
-      .map(item => item + 'xxx'),
-    a: [{ b: 'str' }],
-  });
-  const fieldName = field2Obj(formData, false);
+  const {
+    formData,
+    setFormData,
+    MyForm,
+    handleFormChange,
+    fieldName,
+  } = useOneStep(
+    {
+      text: '我是默认值',
+      yo: '我也是',
+      list: ' '
+        .repeat(3)
+        .split('')
+        .map((_, index) => `${index}`)
+        .sort((a: string, b: string) => parseInt(a) - parseInt(b))
+        .map(item => item + 'xxx'),
+      a: [{ b: 'str' }],
+      listWithObj: ' '
+        .repeat(3)
+        .split('')
+        .map((_, index) => ({
+          name: index,
+          password: index,
+        })),
+    },
+    console.log
+  );
+  // const fieldName = field2Obj(formData, false);
   // const list = fieldName.list.sort((a: string, b: string) => {
   //   return (
   //     parseInt(a.replace(/[^\d]/g, '')) - parseInt(b.replace(/[^\d]/g, ''))
   //   );
   // });
   const list = fieldName.list;
+  const listWithObj = fieldName.listWithObj;
 
   const afterSort = (before: number, after: number) => {
-    const _formData = { ...formData };
+    // const _formData = { ...formData };
+    // const l = fieldName.list[before];
+    // const r = fieldName.list[after];
+    // const tmp = _formData[l].index;
+    // _formData[l].index = _formData[r].index;
+    // _formData[r].index = tmp;
+    // console.log(fieldName, l, r, _formData[l], _formData[r]);
+    // setFormData(_formData);
+
+    console.log(fieldName);
+
     const l = fieldName.list[before];
     const r = fieldName.list[after];
-    const tmp = _formData[l].index;
-    _formData[l].index = _formData[r].index;
-    _formData[r].index = tmp;
-    console.log(fieldName, l, r, _formData[l], _formData[r]);
-    setFormData(_formData);
+    setFormData(formSort(l, r, formData));
   };
 
-  // console.log(fieldName);
+  const afterSort2 = (before: number, after: number) => {
+    console.log(formData);
+
+    const l = fieldName.listWithObj[before];
+    const r = fieldName.listWithObj[after];
+
+    setFormData(formSort(l, r, formData));
+
+    // console.warn(l.__idx__);
+    // const tmp = _formData[l].index;
+    // _formData[l].index = _formData[r].index;
+    // _formData[r].index = tmp;
+    // console.log(fieldName, l, r, _formData[l], _formData[r]);
+    // setFormData(_formData);
+  };
+
+  console.log(fieldName);
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
@@ -418,6 +458,17 @@ function OneStepForm() {
       <DndProvider backend={HTML5Backend}>
         {list.map((item: string, index: number) => (
           <Card item={item} index={index} key={item} afterSort={afterSort} />
+        ))}
+      </DndProvider>
+      <h2>双倍快乐</h2>
+      <DndProvider backend={HTML5Backend}>
+        {listWithObj.map((item: string, index: number) => (
+          <DoubleCard
+            item={item}
+            index={index}
+            key={index}
+            afterSort={afterSort2}
+          />
         ))}
       </DndProvider>
       <Input name="yo" label="yo" />
@@ -471,6 +522,63 @@ function Card(props: { item: any; index: any; afterSort: any }) {
         三
       </span>
       <Input key={item} name={item} label={'密码' + item} {...other} />
+    </div>
+  );
+}
+
+function DoubleCard(props: { item: any; index: any; afterSort: any }) {
+  const { item, index, afterSort, ...other } = props;
+
+  const [{ isDragging }, drag, ConnectDragPreview] = useDrag({
+    item: { type: ItemTypes.CARD },
+    begin: () => {
+      setDragBeginIndex(index);
+    },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    drop: () => {
+      if (
+        dragBeginIndex !== undefined &&
+        index !== undefined &&
+        dragBeginIndex !== index
+      ) {
+        afterSort(dragBeginIndex, index);
+      }
+    },
+    collect: mon => ({
+      isOver: !!mon.isOver(),
+      canDrop: !!mon.canDrop(),
+    }),
+  });
+
+  console.log(item);
+
+  return ConnectDragPreview(
+    <div ref={drop} style={{ position: 'relative' }}>
+      <span
+        ref={drag}
+        style={{
+          display: 'inline-block',
+          position: 'absolute',
+          zIndex: 99,
+          left: '20px',
+          top: '8px',
+        }}
+      >
+        三
+      </span>
+      <Input key={item.name} name={item.name} label={'用户名'} {...other} />
+      <Input
+        key={item.password}
+        name={item.password}
+        label={'密码'}
+        {...other}
+      />
     </div>
   );
 }
