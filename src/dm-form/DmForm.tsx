@@ -119,13 +119,20 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
   const handleFormChange = (changedFields: any) => {
     setFormData({ ...formData, ...changedFields });
   };
+
+  const fieldName = field2Obj(formData, false);
+
+  const sortForm = (field: any, l: number, r: number) => {
+    setFormData(formSort(field, l, r, formData));
+  };
   // console.timeEnd('useOneStep3');
   return {
     formData,
     setFormData,
     MyForm,
     handleFormChange,
-    fieldName: field2Obj(formData, false),
+    fieldName,
+    sortForm,
   };
 }
 
@@ -163,7 +170,7 @@ type FieldToState2<T> = {
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
-      }
+      };
 };
 type fieldIniter = <T>(field: T) => FieldToState2<T>;
 

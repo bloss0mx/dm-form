@@ -388,6 +388,8 @@ function setDragBeginIndex(index: number) {
   dragBeginIndex = index;
 }
 
+const randomPwd = () => Math.floor(Math.random() * 10e15).toString(36);
+
 /**
  * OneStepForm
  */
@@ -398,69 +400,38 @@ function OneStepForm() {
     MyForm,
     handleFormChange,
     fieldName,
+    sortForm,
   } = useOneStep(
     {
       text: '我是默认值',
       yo: '我也是',
       list: ' '
-        .repeat(30)
+        .repeat(3)
         .split('')
-        .map((_, index) => `${index}`)
-        .sort((a: string, b: string) => parseInt(a) - parseInt(b))
-        .map(item => item + 'xxx'),
+        .map((_, index) => `${12 - index}`)
+        // .sort((a: string, b: string) => parseInt(a) - parseInt(b))
+        .map(item => 'lPhone ' + item + ''),
       a: [{ b: 'str' }],
       listWithObj: ' '
         .repeat(3)
         .split('')
         .map((_, index) => ({
-          name: index,
-          password: index,
+          name: 'Wawei P' + (3 - index) * 10,
+          password: randomPwd() + randomPwd(),
         })),
     },
     console.log
   );
-  // const fieldName = field2Obj(formData, false);
-  // const list = fieldName.list.sort((a: string, b: string) => {
-  //   return (
-  //     parseInt(a.replace(/[^\d]/g, '')) - parseInt(b.replace(/[^\d]/g, ''))
-  //   );
-  // });
+
   const list = fieldName.list;
   const listWithObj = fieldName.listWithObj;
 
   const afterSort = (before: number, after: number) => {
-    // const _formData = { ...formData };
-    // const l = fieldName.list[before];
-    // const r = fieldName.list[after];
-    // const tmp = _formData[l].index;
-    // _formData[l].index = _formData[r].index;
-    // _formData[r].index = tmp;
-    // console.log(fieldName, l, r, _formData[l], _formData[r]);
-    // setFormData(_formData);
-
-    // console.log(fieldName);
-
-    // const l = fieldName.list[before];
-    // const r = fieldName.list[after];
-    setFormData(formSort(fieldName.list, before, after, formData));
+    sortForm(list, before, after);
   };
 
   const afterSort2 = (before: number, after: number) => {
-    // console.log(formData);
-
-    // const l = fieldName.listWithObj[before];
-    // const r = fieldName.listWithObj[after];
-
-    // setFormData(formSort(fieldName.list, l, r, formData));
-
-    // console.warn(l.__idx__);
-    // const tmp = _formData[l].index;
-    // _formData[l].index = _formData[r].index;
-    // _formData[r].index = tmp;
-    // console.log(fieldName, l, r, _formData[l], _formData[r]);
-    // setFormData(_formData);
-
-    setFormData(formSort(fieldName.listWithObj, before, after, formData));
+    sortForm(listWithObj, before, after);
   };
 
   // console.log(fieldName);
@@ -556,7 +527,7 @@ function Card(props: { item: any; index: any; afterSort: any }) {
       >
         三
       </span>
-      <Input key={item} name={item} label={'密码'} {...other} />
+      <Input key={item} name={item} label={index + 1 + '等奖'} {...other} />
     </div>
   );
 }
@@ -615,7 +586,12 @@ function DoubleCard(props: { item: any; index: any; afterSort: any }) {
       >
         三
       </span>
-      <Input key={item.name} name={item.name} label={'用户名'} {...other} />
+      <Input
+        key={item.name}
+        name={item.name}
+        label={index + 1 + '等奖'}
+        {...other}
+      />
       <Input
         key={item.password}
         name={item.password}
