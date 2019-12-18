@@ -19,7 +19,9 @@ import DmForm, {
   useFormComponent,
   useOneStep,
   formSort,
+  pushFormItem,
 } from './DmForm';
+import Base from './Base';
 import Submit from './Submit';
 import CheckBox from './CheckBox';
 import FormItem from './FormItem';
@@ -29,6 +31,7 @@ import Select from './Select';
 import Radio from './Radio';
 import TimePicker from './TimePicker';
 import NoReRender from './NoReRender';
+import Button from 'antd/es/button';
 
 export {
   Login,
@@ -49,6 +52,8 @@ export {
   field2Obj,
   obj2Field,
 };
+
+console.log(Input instanceof Base);
 
 const validator = (rule: object, value: string, callback: Function) => {
   if (value.match(/\s/g)) callback('空字符无效');
@@ -193,6 +198,12 @@ export default class HorizontalLoginForm extends React.Component<any, state> {
       fields: { ...state.fields, ...changedFields },
     }));
   };
+
+  componentDidMount() {
+    setInterval(() => {
+      this.setState({ time: moment() });
+    }, 1000);
+  }
 
   render() {
     const { time, fields } = this.state;
@@ -392,7 +403,7 @@ function OneStepForm() {
       text: '我是默认值',
       yo: '我也是',
       list: ' '
-        .repeat(3)
+        .repeat(30)
         .split('')
         .map((_, index) => `${index}`)
         .sort((a: string, b: string) => parseInt(a) - parseInt(b))
@@ -429,18 +440,18 @@ function OneStepForm() {
 
     // console.log(fieldName);
 
-    const l = fieldName.list[before];
-    const r = fieldName.list[after];
-    setFormData(formSort(l, r, formData));
+    // const l = fieldName.list[before];
+    // const r = fieldName.list[after];
+    setFormData(formSort(fieldName.list, before, after, formData));
   };
 
   const afterSort2 = (before: number, after: number) => {
-    console.log(formData);
+    // console.log(formData);
 
-    const l = fieldName.listWithObj[before];
-    const r = fieldName.listWithObj[after];
+    // const l = fieldName.listWithObj[before];
+    // const r = fieldName.listWithObj[after];
 
-    setFormData(formSort(l, r, formData));
+    // setFormData(formSort(fieldName.list, l, r, formData));
 
     // console.warn(l.__idx__);
     // const tmp = _formData[l].index;
@@ -448,9 +459,23 @@ function OneStepForm() {
     // _formData[r].index = tmp;
     // console.log(fieldName, l, r, _formData[l], _formData[r]);
     // setFormData(_formData);
+
+    setFormData(formSort(fieldName.listWithObj, before, after, formData));
   };
 
   // console.log(fieldName);
+
+  const addField = () => {
+    const len = fieldName.listWithObj.length;
+    pushFormItem(
+      `listWithObj.here[${len}][0].say`,
+      {
+        name: 'hey',
+        password: 'yo',
+      },
+      formData
+    );
+  };
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
@@ -473,6 +498,7 @@ function OneStepForm() {
         ))}
       </DndProvider>
       <Input name="yo" label="yo" />
+      <Button onClick={addField}>add</Button>
       <Submit name="submit" />
     </MyForm>
   );
