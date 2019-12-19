@@ -122,8 +122,8 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
 
   const fieldName = field2Obj(formData, false);
 
-  const sortForm = (field: any, l: number, r: number) => {
-    setFormData(formSort(field, l, r, formData));
+  const sortForm = (fieldName: any, l: number, r: number) => {
+    setFormData(formSort(fieldName, l, r, formData));
   };
   // console.timeEnd('useOneStep3');
   return {

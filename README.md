@@ -127,6 +127,7 @@ const {
   MyForm,
   handleFormChange,
   fieldName,
+  sortForm,
 } = useOneStep(
   {
     defaultVal: '我是默认值',
@@ -150,6 +151,192 @@ const {
 - `MyForm`：组件本体，**_需要放入 render 中以显示_**。通常只需要写`<MyForm onChange={handleFormChange} {...formData} ></MyForm>`，就可以了。
 - `handleFormChange`：处理表单变化函数。**_需要作为参数放入 MyForm 组件_**。
 - `fieldName`：表单结构对象。由于表单在 owl-form 中被处理成不太好理解的格式，所以在处理复杂表单时，建议直接使用 fieldName，来展开数组或对象。
+
+## 原理
+
+owl-form 是基于 antd 的 form 组件。在使用 form 组件进行双向绑定时，首先要使用 Form.create 以高阶组件分方式，把 FormComponentProps 传入内部的 props 中，以提供诸如：getFieldDecorator、getFieldsError、getFieldError、 isFieldTouched 这类的函数，完成双向绑定。
+
+owl-form 为了简化代码，把所有操作封装在了 owl-form 组件的初始化阶段。
+
+Init 函数返回一个高阶组件，内部的 render 返回一个 antd 的 Form 组件，它的子节点通过 content 函数来注入 FormComponentProps。它会针对每个不同类型的子节点做不同的注入操作。
+
+- NoReRender 组件，不进行注入
+- antd 的 Form.Item 组件和 Form 组件，不进行注入
+- 函数节点，注入并执行
+- 原生节点，不注入，继续遍历子节点
+- AutoBind 节点，暂不支持
+- 其他 React 节点，注入
+- 其他节点，诸如 string、number 之类，直接返回
+
+## fieldName
+
+这里重点介绍一下 fieldName。
+
+在 antd 中，form 组件对复合组件支持不足，对 array 类型的表单数据处理较为困难。
+
+owl-form 为了支持复合表单，需要把复合对象拍扁，于是原本的对象就会变得面目全非。
+
+```javascript
+// 原始数据
+const origin = {
+  text: '我是默认值',
+  yo: '我也是',
+  list: [1, 2, 3],
+  listWithObj: [
+    {
+      a: 1,
+      b: 2,
+    },
+    {
+      a: 2,
+      b: 4,
+    },
+  ],
+};
+
+// 生成数据
+formData = {
+  text: {
+    value: '我是默认值',
+    index: 'text',
+  },
+  yo: {
+    value: '我也是',
+    index: 'yo',
+  },
+  list_11: {
+    value: 1,
+    index: '0',
+  },
+  list_12: {
+    value: 2,
+    index: '1',
+  },
+  list_13: {
+    value: 3,
+    index: '2',
+  },
+  a_14$b: {
+    value: 'str',
+    index: 'b',
+  },
+  listWithObj_15$a: {
+    value: 1,
+    index: 'a',
+  },
+  listWithObj_15$b: {
+    value: 2,
+    index: 'b',
+  },
+  listWithObj_16$a: {
+    value: 2,
+    index: 'a',
+  },
+  listWithObj_16$b: {
+    value: 4,
+    index: 'b',
+  },
+};
+```
+
+为了提供更好的体验，引入了 fieldName。
+
+```javascript
+// fieldName类型
+fieldName = {
+  text: 'text',
+  yo: 'yo',
+  list: ['list_11', 'list_12', 'list_13'],
+  a: [
+    {
+      b: 'a_14$b',
+    },
+  ],
+  listWithObj: [
+    {
+      a: 'listWithObj_15$a',
+      b: 'listWithObj_15$b',
+    },
+    {
+      a: 'listWithObj_16$a',
+      b: 'listWithObj_16$b',
+    },
+  ],
+};
+```
+
+fieldName 和 formData 的数据保持了相同的结构，但是值变为了对应变量在 formData 中的 **_键_**。我们可以通过直接使用 fieldName 来获取它在 formData 中的值。
+
+比如这样：
+
+```javascript
+// 假设我要取 listWithObj[0].a
+const name = fieldName[0].a;
+const answer = formData[name];
+```
+
+凡是 api 中提示名为 fieldName 的参数都需要使用 fieldName。
+
+## API
+
+### `useOneStep` 一步到位 hook。
+
+initState: 初始化 state
+onSubmit: 触发提交事件回调
+
+```typescript
+type useOneStep = (
+  initState?: any,
+  onSubmit?: Function
+) => {
+  MyForm: React.ReactElement;
+  fieldName: any;
+  setFormData: any;
+  formData: Function;
+  handleFormChange: Function;
+  sortForm: Function;
+};
+```
+
+### `MyForm`
+
+组件本体，**_需要放入 render 中以显示_**。通常只需要写`<MyForm onChange={handleFormChange} {...formData} ></MyForm>`，就可以了。
+
+```jsx
+<MyForm onChange={handleFormChange} {...formData}></MyForm>
+```
+
+### `formData`
+
+当前处理中的值，**_需要作为参数放入 MyForm 组件_**。一般不建议直接使用，由于 owl-form 内部会把对象扁平化，所以可能也不利于直接使用。
+
+### `fieldName`
+
+表单结构对象。由于表单在 owl-form 中被处理成不太好理解的格式，所以在处理复杂表单时，建议直接使用 fieldName，来展开数组或对象。
+
+### `setFormData`
+
+直接操纵值，和 formData 一样，不建议直接使用，如果需要使用，我会在文档中明确标识。
+
+```typescript
+type setFormData = (formData: any) => void;
+```
+
+### `handleFormChange`
+
+处理表单变化函数。**_需要作为参数放入 MyForm 组件_**。
+
+```typescript
+type onFieldsChange = (props: T, fields: any, allFields: any) => void;
+```
+
+### `sortForm`
+
+表单排序
+
+```typescript
+type sortForm = (fieldName: any, l: number, r: number) => void;
+```
 
 ## TODO
 
