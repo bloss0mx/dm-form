@@ -138,7 +138,13 @@ function funcCompDealer(
   selfDefinedComponent: (props: FormComponentProps) => React.ReactElement,
   key: ReactText
 ): React.ReactElement {
-  return React.cloneElement(selfDefinedComponent({ ...formProps }), { key });
+  const component = selfDefinedComponent({ ...formProps });
+  if (component === undefined) {
+    throw Error(
+      `自定义函数组件必须要返回有效的React.Element！现为：${component}`
+    );
+  }
+  return React.cloneElement(component, { key });
 }
 
 export function componentFormBind(

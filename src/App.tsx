@@ -6,11 +6,10 @@ import DmForm from './dm-form';
 const App: React.FC = () => {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Owl-Form</h1>
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
-        <DmForm />
-      </header>
+      <header className="App-header"></header>
+      <h1>Owl-Form</h1>
+      {/* <img src={logo} className="App-logo" alt="logo" /> */}
+      <DmForm />
     </div>
   );
 };

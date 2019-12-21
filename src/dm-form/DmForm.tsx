@@ -210,7 +210,7 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         // console.log(v);
-        data = { ...data, ...obj2Field(obj[v], preFix + genHash(), v) };
+        data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
       }
     }
   } else if (obj.constructor === Object) {
