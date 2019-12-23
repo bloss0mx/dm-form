@@ -126,8 +126,8 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
 
   const fieldName = field2Obj(formData, false);
 
-  const sortForm = (field: any, l: number, r: number) => {
-    setFormData(formSort(field, l, r, formData));
+  const sortForm = (fieldName: any, l: number, r: number) => {
+    setFormData(formSort(fieldName, l, r, formData));
   };
   // console.timeEnd('useOneStep3');
   return {
@@ -214,7 +214,7 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         // console.log(v);
-        data = { ...data, ...obj2Field(obj[v], preFix + genHash(), v) };
+        data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
       }
     }
   } else if (obj.constructor === Object) {

@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
-import { Form, Icon, Input as InputAntd } from "antd";
-import { FormComponentProps } from "antd/es/form";
-import { FormItemProps } from "./formChildrenDealer";
-import { GetFieldDecoratorOptions } from "antd/es/form/Form";
+import React, { useMemo } from 'react';
+import { Form, Icon, Input as InputAntd } from 'antd';
+import { FormComponentProps } from 'antd/es/form';
+import { FormItemProps } from './formChildrenDealer';
+import { GetFieldDecoratorOptions } from 'antd/es/form/Form';
 
 type Base = (props: anyThing & FormItemProps & React.Component) => any;
 
@@ -19,19 +19,22 @@ export type props = anyThing & FormItemProps & GetFieldDecoratorOptions;
 
 export default function Base(props: props & base) {
   if (props.form === undefined) {
-    throw Error("此组件需要放在DmForm中");
+    throw Error('此组件需要放在DmForm中');
   }
   const {
-    form: { getFieldDecorator }
+    form: { getFieldDecorator },
   } = (props as any) as FormComponentProps;
-  const { name, TargetComponent } = props;
+  const { TargetComponent, ...other } = props;
+  const { name } = props;
   const { _formItem, _getFieldDecorator, _form, _other } = useMemo(
-    () => splitProps(props),
+    () => splitProps(other),
     [props]
   );
   return (
     <Form.Item {..._formItem} {..._form}>
-      {getFieldDecorator(name, _getFieldDecorator)(<TargetComponent {..._other} />)}
+      {getFieldDecorator(name, _getFieldDecorator)(
+        <TargetComponent {..._other} />
+      )}
     </Form.Item>
   );
 }
@@ -84,7 +87,7 @@ function splitProps(
     hasFeedback,
     required,
     style,
-    colon
+    colon,
   };
   const _getFieldDecorator: GetFieldDecoratorOptions = {
     valuePropName,
@@ -97,13 +100,13 @@ function splitProps(
     exclusive,
     normalize,
     validateFirst,
-    preserve
+    preserve,
   };
   return {
     _form: deleteUndefined(form),
     _formItem: deleteUndefined(_formItem),
     _getFieldDecorator: deleteUndefined(_getFieldDecorator),
-    _other: deleteUndefined(other)
+    _other: deleteUndefined(other),
   };
 }
 
