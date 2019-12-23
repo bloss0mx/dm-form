@@ -448,6 +448,8 @@ function OneStepForm() {
     );
   };
 
+  console.log(fieldName);
+
   return (
     <MyForm onChange={handleFormChange} {...formData}>
       <Input name="text" label="text" />

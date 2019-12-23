@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo, ReactText } from 'react';
 import { Form } from 'antd';
-import { FormComponentProps, FormCreateOption } from 'antd/es/form';
+import {
+  FormComponentProps,
+  FormCreateOption,
+} from 'antd/es/form';
 import { content } from './formChildrenDealer';
 import { FormProps, value } from './formChildrenDealer';
 
@@ -8,8 +11,9 @@ interface FormOnly<T> {
   onSubmit: (values: T) => value;
 }
 
-const ARRAY_SEPARATOR = '_';
-const OBJECT_SEPARATOR = '$';
+export const ARRAY_SEPARATOR = '[';
+export const OBJECT_SEPARATOR = '{';
+export const INDEX_NAME = '__idx__';
 
 function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
   class DmForm<P> extends React.PureComponent<
@@ -170,7 +174,7 @@ type FieldToState2<T> = {
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
-      };
+      }
 };
 type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
@@ -206,7 +210,7 @@ export function genHash() {
 export function obj2Field(obj: any, preName = '', index?: ReactText) {
   let data = {} as any;
   if (obj.constructor === Array) {
-    const preFix = preName === '' ? '' : preName + '_';
+    const preFix = preName === '' ? '' : preName + ARRAY_SEPARATOR;
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         // console.log(v);
@@ -214,7 +218,7 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
       }
     }
   } else if (obj.constructor === Object) {
-    const preFix = preName === '' ? '' : preName + '$';
+    const preFix = preName === '' ? '' : preName + OBJECT_SEPARATOR;
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
@@ -231,10 +235,12 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
  * @param name
  */
 function nameDealer(name = '') {
-  const curr = name.match(/^[^_\$]+/);
-  const rmedCurr = name.replace(/^[^_\$]+/, '');
-  const symbol = rmedCurr.match(/^[_\$]/);
-  const nextLevelName = rmedCurr.replace(/^[_\$]/, '');
+  const currReg = new RegExp(`^[^\\${ARRAY_SEPARATOR}\\${OBJECT_SEPARATOR}]+`);
+  const symbolReg = new RegExp(`^[\\${ARRAY_SEPARATOR}\\${OBJECT_SEPARATOR}]`);
+  const curr = name.match(currReg);
+  const rmedCurr = name.replace(currReg, '');
+  const symbol = rmedCurr.match(symbolReg);
+  const nextLevelName = rmedCurr.replace(symbolReg, '');
   return {
     name,
     curr: (curr && curr[0]) || '',
@@ -242,8 +248,6 @@ function nameDealer(name = '') {
     nextLevelName,
   };
 }
-
-const indexName = '__idx__';
 
 /**
  * field转换为对象
@@ -281,7 +285,7 @@ function _field2Obj(
     obj = {};
   }
   if (!getValue)
-    Object.defineProperty(obj, indexName, {
+    Object.defineProperty(obj, INDEX_NAME, {
       enumerable: false,
       configurable: false,
       writable: true,
@@ -299,7 +303,7 @@ function _field2Obj(
       nextField[nextLevelName] = field[v];
       if (curr !== nextCurr || index === keys.length - 1) {
         // 本层不同
-        if (symbol === '$') {
+        if (symbol === OBJECT_SEPARATOR) {
           // 对象
           if (obj.constructor === Array) {
             const target = _field2Obj(
@@ -309,7 +313,7 @@ function _field2Obj(
               currName + curr + symbol
             );
             if (!getValue)
-              Object.defineProperty(target, indexName, {
+              Object.defineProperty(target, INDEX_NAME, {
                 enumerable: false,
                 configurable: false,
                 writable: true,
@@ -325,7 +329,7 @@ function _field2Obj(
               currName + curr + symbol
             );
             if (!getValue)
-              Object.defineProperty(target, indexName, {
+              Object.defineProperty(target, INDEX_NAME, {
                 enumerable: false,
                 configurable: false,
                 writable: true,
@@ -336,7 +340,7 @@ function _field2Obj(
               ...target,
             };
           }
-        } else if (symbol === '_') {
+        } else if (symbol === ARRAY_SEPARATOR) {
           // 数组
           if (obj.constructor === Array)
             obj.push(
@@ -380,6 +384,11 @@ export function field2Obj(field: any, getValue: boolean = true) {
   return _field2Obj(field, getValue);
 }
 
+const symbolHeadReg = new RegExp(
+  `^[^\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]+`
+);
+const objectHead = new RegExp(`^[\\${OBJECT_SEPARATOR}]`);
+
 /**
  * 分解数组
  * @param list
@@ -393,15 +402,27 @@ export function list(list: any, prefix: string) {
   return ([{ curr: undefined, answer: [] }, ...keys1] as any).reduce(
     (sum: any, item: any) => {
       const newSum = { ...sum };
-      const matched1st = item.replace(new RegExp('^' + prefix + '[$_]'), '');
-      const matched2nd = matched1st.replace(/^[^$_]+/, '').match(/^[$]/);
+      const matched1st = item.replace(
+        new RegExp(
+          '^' + prefix + `[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
+        ),
+        ''
+      );
+      const matched2nd = matched1st
+        .replace(symbolHeadReg, '')
+        .match(objectHead);
       if (
-        (matched1st && matched1st.match(/^[^$_]+/)[0] !== newSum.curr) ||
+        (matched1st && matched1st.match(symbolHeadReg)[0] !== newSum.curr) ||
         newSum.curr === undefined
       ) {
         newSum.curr = item
-          .replace(new RegExp('^' + prefix + '[$_]'), '')
-          .match(/^[^$_]+/)[0];
+          .replace(
+            new RegExp(
+              '^' + prefix + `[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
+            ),
+            ''
+          )
+          .match(symbolHeadReg)[0];
         if (matched2nd) newSum.answer = [...sum.answer, []];
       }
 
@@ -430,15 +451,15 @@ export function formSort(basePath: any, l: number, r: number, formData: any) {
   let _formData = { ...formData };
   for (let i = l < r ? l : l - 1; ; ) {
     if (
-      basePath[i].__idx__ === undefined ||
-      basePath[i + 1].__idx__ === undefined
+      basePath[i][INDEX_NAME] === undefined ||
+      basePath[i + 1][INDEX_NAME] === undefined
     ) {
       const tmp = _formData[basePath[i]];
       _formData[basePath[i]] = _formData[basePath[i + 1]];
       _formData[basePath[i + 1]] = tmp;
     } else {
-      const leftPrefix = basePath[i].__idx__;
-      const rightPrefix = basePath[i + 1].__idx__;
+      const leftPrefix = basePath[i][INDEX_NAME];
+      const rightPrefix = basePath[i + 1][INDEX_NAME];
       const leftIndex = leftPrefix.match(matchSeparator);
       const rightIndex = rightPrefix.match(matchSeparator);
       const prefix = rightPrefix.replace(matchSeparator, '');
@@ -471,8 +492,17 @@ function exchangeData(
   formData: any
 ) {
   const _formData = { ...formData };
+  const prefix = new RegExp(
+    '^' +
+      leftPrefix.replace(
+        new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g'),
+        (item: string) => '\\' + item
+      ) +
+      leftIndex
+  );
   Object.keys(formData).forEach(item => {
-    if (item.match(new RegExp('^' + leftPrefix + leftIndex))) {
+    if (item.match(prefix)) {
+      console.log(prefix);
       const [pre, mid, end] = splitName(item, leftPrefix, leftIndex);
       const tmp = _formData[pre + (leftIndex + '') + end];
       _formData[pre + (leftIndex + '') + end] =
