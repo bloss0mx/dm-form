@@ -19,7 +19,8 @@ import DmForm, {
   useFormComponent,
   useOneStep,
   formSort,
-  pushFormItem,
+  setFormItem,
+  rmFormItem,
 } from './DmForm';
 import Base from './Base';
 import Submit from './Submit';
@@ -70,7 +71,7 @@ const validator = (rule: object, value: string, callback: Function) => {
 export default class HorizontalLoginForm extends React.Component<any, any> {
   render() {
     return (
-      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '500px', margin: '0 auto', padding: '8px' }}>
         <OneStepForm />
       </div>
     );
@@ -124,8 +125,8 @@ function OneStepForm() {
     console.log
   );
 
-  const list = fieldName.list;
-  const listWithObj = fieldName.listWithObj;
+  const list = fieldName.list || [];
+  const listWithObj = fieldName.listWithObj || [];
 
   const afterSort = (before: number, after: number) => {
     sortForm(list, before, after);
@@ -138,15 +139,26 @@ function OneStepForm() {
   // console.log(fieldName);
 
   const addField = () => {
-    const len = fieldName.listWithObj.length;
-    pushFormItem(
-      `listWithObj.here[${len}][0].say`,
+    const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
+    const newData = setFormItem(
+      `listWithObj[${len + 1}`,
       {
-        name: 'hey',
-        password: 'yo',
+        name: '双倍快乐' + len + 1,
+        password: 'cola',
       },
       formData
     );
+    console.log(newData);
+    setFormData({
+      ...formData,
+      ...newData,
+    });
+  };
+
+  const rmField = () => {
+    const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
+    const newData = rmFormItem(`listWithObj[${0}`, fieldName, formData);
+    setFormData(newData);
   };
 
   console.log(fieldName);
@@ -175,7 +187,7 @@ function OneStepForm() {
       {({ form: { getFieldDecorator } }: FormComponentProps) => (
         <FormAntd.Item label={'自定义组件'}>
           <Row gutter={8}>
-            <Col span={12}>
+            <Col span={14}>
               {getFieldDecorator('captcha', {
                 rules: [
                   {
@@ -185,7 +197,7 @@ function OneStepForm() {
                 ],
               })(<InputAntd />)}
             </Col>
-            <Col span={12}>
+            <Col span={10}>
               <Button>Get captcha</Button>
             </Col>
           </Row>
@@ -210,6 +222,8 @@ function OneStepForm() {
         </Row>
       </FormItem>
       <Button onClick={addField}>add</Button>
+      &nbsp;&nbsp;
+      <Button onClick={rmField}>rm</Button>
       <Submit name="submit" />
     </MyForm>
   );

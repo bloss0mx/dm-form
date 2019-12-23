@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useMemo, ReactText } from 'react';
 import { Form } from 'antd';
-import {
-  FormComponentProps,
-  FormCreateOption,
-} from 'antd/es/form';
+import { FormComponentProps, FormCreateOption } from 'antd/es/form';
 import { content } from './formChildrenDealer';
 import { FormProps, value } from './formChildrenDealer';
 
@@ -513,21 +510,26 @@ function exchangeData(
   return _formData;
 }
 
-export function pushFormItem(dataPath: string, data: any, formData: any) {
+function genNames(dataPath: string) {
   const reg = /\]\[|\]\.|[\[\]\.]/g;
-  const names = dataPath.split(reg);
-  const types = dataPath.match(reg);
-  console.log(dataPath, names, types);
+  return { names: dataPath.split(reg), types: dataPath.match(reg) };
+}
+function genPath(dataPath: string) {
+  const { names, types } = genNames(dataPath);
   let path = '';
   if (types) {
     names.forEach((item, index) => {
-      console.log(types[index]);
       path += item +=
         (types[index] &&
           (types[index].match(/\[$/) ? ARRAY_SEPARATOR : OBJECT_SEPARATOR)) ||
         '';
     });
   }
+  return path;
+}
+
+export function setFormItem(dataPath: string, data: any, formData: any) {
+  let path = genPath(dataPath);
   if (data.constructor === Object || data.constructor === Array) {
     let separator = OBJECT_SEPARATOR;
     if (data.constructor === Array) {
@@ -542,4 +544,45 @@ export function pushFormItem(dataPath: string, data: any, formData: any) {
     const target = {} as any;
     target[path] = { value: data };
   }
+}
+
+export function rmFormItem(dataPath: string, fieldName: any, formData: any) {
+  let _formData = { ...formData };
+  const path = genPath(dataPath);
+  const newData = {} as any;
+  const pathRegExp = path.replace(
+    new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g'),
+    item => '\\' + item
+  );
+  const { names } = genNames(dataPath);
+  const _names = names;
+  _names.splice(names.length - 1, 1);
+  const target = [fieldName, ..._names].reduce((sum, index) => {
+    console.log(sum, index);
+    return sum[index];
+  });
+  const lastOneIndex = target.length - 1;
+
+  console.log(target);
+
+  const separator = path.match(
+    new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g')
+  );
+  if (separator && separator[0] === ARRAY_SEPARATOR) {
+    const found = path.match(/\d$/);
+    if (found) {
+      const targetIndex = (found[0] as any) - 0;
+      console.log(path, targetIndex, lastOneIndex, formData);
+      _formData = formSort(path, targetIndex, lastOneIndex, formData);
+      console.log(_formData);
+    }
+  }
+
+  Object.keys(_formData).forEach(item => {
+    if (!item.match(new RegExp('^' + pathRegExp))) {
+      newData[item] = _formData[item];
+    }
+  });
+  console.log(newData);
+  return newData;
 }

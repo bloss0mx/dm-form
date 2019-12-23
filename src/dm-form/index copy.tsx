@@ -19,7 +19,7 @@ import DmForm, {
   useFormComponent,
   useOneStep,
   formSort,
-  pushFormItem,
+  setFormItem,
 } from './DmForm';
 import Base from './Base';
 import Submit from './Submit';
@@ -438,7 +438,7 @@ function OneStepForm() {
 
   const addField = () => {
     const len = fieldName.listWithObj.length;
-    pushFormItem(
+    setFormItem(
       `listWithObj.here[${len}][0].say`,
       {
         name: 'hey',
