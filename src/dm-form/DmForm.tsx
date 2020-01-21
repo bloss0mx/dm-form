@@ -334,22 +334,26 @@ function _field2Obj(
             currName + curr + symbol
           );
           if (obj.constructor === Array) {
-            Object.defineProperty(target, INDEX_NAME, {
-              enumerable: false,
-              configurable: false,
-              writable: true,
-              value: currName + curr,
-            });
+            if (!getValue) {
+              Object.defineProperty(target, INDEX_NAME, {
+                enumerable: false,
+                configurable: false,
+                writable: true,
+                value: currName + curr,
+              });
+            }
             obj.push(target);
           } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = [];
             const _target = [...obj[curr], ...target];
-            Object.defineProperty(_target, INDEX_NAME, {
-              enumerable: false,
-              configurable: false,
-              writable: true,
-              value: currName + curr,
-            });
+            if (!getValue) {
+              Object.defineProperty(_target, INDEX_NAME, {
+                enumerable: false,
+                configurable: false,
+                writable: true,
+                value: currName + curr,
+              });
+            }
             obj[curr] = _target;
           }
         }
@@ -609,7 +613,7 @@ export function rmFormItem(dataPath: any, fieldName: any, formData: any) {
       newData[item] = _formData[item];
     }
   });
-  console.log(newData);
+  // console.log(newData);
   return newData;
 }
 

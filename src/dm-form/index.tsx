@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  CSSProperties,
+} from 'react';
 import { Form as FormAntd, Input as InputAntd, Row, Col } from 'antd';
 import Form, { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
@@ -156,7 +162,7 @@ function OneStepForm() {
   const rmField = (index: number) => {
     // const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
     // console.log(fieldName.listWithObj[0]);
-    console.log(fieldName.listWithObj[index], index);
+    // console.log(fieldName.listWithObj[index], index);
     const newData = rmFormItem(
       fieldName.listWithObj[index],
       fieldName,
@@ -175,7 +181,7 @@ function OneStepForm() {
     setFormData(newData);
   };
 
-  console.log(fieldName);
+  // console.log(fieldName);
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
@@ -346,6 +352,13 @@ function DoubleCard(props: {
 
   // console.log(item);
 
+  const style = {
+    display: 'inline-block',
+    position: 'absolute',
+    zIndex: 99,
+    left: '4px',
+  } as CSSProperties;
+
   return ConnectDragPreview(
     <div
       ref={drop}
@@ -356,41 +369,18 @@ function DoubleCard(props: {
         padding: '8px',
       }}
     >
-      <span
-        ref={drag}
-        style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
-          top: '0px',
-        }}
-      >
+      <span ref={drag} style={{ ...style, top: '0px' }}>
         三
       </span>
       <span
         onClick={() => addAfter(index)}
-        style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
-          cursor: 'pointer',
-          top: '20px',
-        }}
+        style={{ ...style, cursor: 'pointer', top: '20px' }}
       >
         add
       </span>
       <span
         onClick={() => rmField(index)}
-        style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
-          cursor: 'pointer',
-          top: '40px',
-        }}
+        style={{ ...style, cursor: 'pointer', top: '40px' }}
       >
         rm
       </span>
