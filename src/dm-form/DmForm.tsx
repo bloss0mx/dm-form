@@ -8,8 +8,9 @@ interface FormOnly<T> {
   onSubmit: (values: T) => value;
 }
 
-const ARRAY_SEPARATOR = '_';
-const OBJECT_SEPARATOR = '$';
+export const ARRAY_SEPARATOR = '[';
+export const OBJECT_SEPARATOR = '{';
+export const INDEX_NAME = '__idx__';
 
 function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
   class DmForm<P> extends React.PureComponent<
@@ -206,7 +207,7 @@ export function genHash() {
 export function obj2Field(obj: any, preName = '', index?: ReactText) {
   let data = {} as any;
   if (obj.constructor === Array) {
-    const preFix = preName === '' ? '' : preName + '_';
+    const preFix = preName === '' ? '' : preName + ARRAY_SEPARATOR;
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         // console.log(v);
@@ -214,7 +215,7 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
       }
     }
   } else if (obj.constructor === Object) {
-    const preFix = preName === '' ? '' : preName + '$';
+    const preFix = preName === '' ? '' : preName + OBJECT_SEPARATOR;
     for (const v in obj) {
       if (obj.hasOwnProperty(v)) {
         data = { ...data, ...obj2Field(obj[v], preFix + v, v) };
@@ -231,10 +232,12 @@ export function obj2Field(obj: any, preName = '', index?: ReactText) {
  * @param name
  */
 function nameDealer(name = '') {
-  const curr = name.match(/^[^_\$]+/);
-  const rmedCurr = name.replace(/^[^_\$]+/, '');
-  const symbol = rmedCurr.match(/^[_\$]/);
-  const nextLevelName = rmedCurr.replace(/^[_\$]/, '');
+  const currReg = new RegExp(`^[^\\${ARRAY_SEPARATOR}\\${OBJECT_SEPARATOR}]+`);
+  const symbolReg = new RegExp(`^[\\${ARRAY_SEPARATOR}\\${OBJECT_SEPARATOR}]`);
+  const curr = name.match(currReg);
+  const rmedCurr = name.replace(currReg, '');
+  const symbol = rmedCurr.match(symbolReg);
+  const nextLevelName = rmedCurr.replace(symbolReg, '');
   return {
     name,
     curr: (curr && curr[0]) || '',
@@ -242,8 +245,6 @@ function nameDealer(name = '') {
     nextLevelName,
   };
 }
-
-const indexName = '__idx__';
 
 /**
  * field转换为对象
@@ -281,7 +282,7 @@ function _field2Obj(
     obj = {};
   }
   if (!getValue)
-    Object.defineProperty(obj, indexName, {
+    Object.defineProperty(obj, INDEX_NAME, {
       enumerable: false,
       configurable: false,
       writable: true,
@@ -299,55 +300,57 @@ function _field2Obj(
       nextField[nextLevelName] = field[v];
       if (curr !== nextCurr || index === keys.length - 1) {
         // 本层不同
-        if (symbol === '$') {
+        if (symbol === OBJECT_SEPARATOR) {
           // 对象
+          const target = _field2Obj(
+            nextField,
+            getValue,
+            {},
+            currName + curr + symbol
+          );
+          if (!getValue) {
+            Object.defineProperty(target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+          }
           if (obj.constructor === Array) {
-            const target = _field2Obj(
-              nextField,
-              getValue,
-              {},
-              currName + curr + symbol
-            );
-            if (!getValue)
-              Object.defineProperty(target, indexName, {
-                enumerable: false,
-                configurable: false,
-                writable: true,
-                value: currName + curr,
-              });
             obj.push(target);
           } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = {};
-            const target = _field2Obj(
-              nextField,
-              getValue,
-              {},
-              currName + curr + symbol
-            );
-            if (!getValue)
-              Object.defineProperty(target, indexName, {
-                enumerable: false,
-                configurable: false,
-                writable: true,
-                value: currName + curr,
-              });
             obj[curr] = {
               ...obj[curr],
               ...target,
             };
           }
-        } else if (symbol === '_') {
+        } else if (symbol === ARRAY_SEPARATOR) {
           // 数组
-          if (obj.constructor === Array)
-            obj.push(
-              _field2Obj(nextField, getValue, [], currName + curr + symbol)
-            );
-          else if (obj.constructor === Object) {
+          const target = _field2Obj(
+            nextField,
+            getValue,
+            [],
+            currName + curr + symbol
+          );
+          if (obj.constructor === Array) {
+            Object.defineProperty(target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+            obj.push(target);
+          } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = [];
-            obj[curr] = [
-              ...obj[curr],
-              ..._field2Obj(nextField, getValue, [], currName + curr + symbol),
-            ];
+            const _target = [...obj[curr], ...target];
+            Object.defineProperty(_target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+            obj[curr] = _target;
           }
         }
         nextField = {};
@@ -380,6 +383,11 @@ export function field2Obj(field: any, getValue: boolean = true) {
   return _field2Obj(field, getValue);
 }
 
+const symbolHeadReg = new RegExp(
+  `^[^\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]+`
+);
+const objectHead = new RegExp(`^[\\${OBJECT_SEPARATOR}]`);
+
 /**
  * 分解数组
  * @param list
@@ -393,15 +401,27 @@ export function list(list: any, prefix: string) {
   return ([{ curr: undefined, answer: [] }, ...keys1] as any).reduce(
     (sum: any, item: any) => {
       const newSum = { ...sum };
-      const matched1st = item.replace(new RegExp('^' + prefix + '[$_]'), '');
-      const matched2nd = matched1st.replace(/^[^$_]+/, '').match(/^[$]/);
+      const matched1st = item.replace(
+        new RegExp(
+          '^' + prefix + `[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
+        ),
+        ''
+      );
+      const matched2nd = matched1st
+        .replace(symbolHeadReg, '')
+        .match(objectHead);
       if (
-        (matched1st && matched1st.match(/^[^$_]+/)[0] !== newSum.curr) ||
+        (matched1st && matched1st.match(symbolHeadReg)[0] !== newSum.curr) ||
         newSum.curr === undefined
       ) {
         newSum.curr = item
-          .replace(new RegExp('^' + prefix + '[$_]'), '')
-          .match(/^[^$_]+/)[0];
+          .replace(
+            new RegExp(
+              '^' + prefix + `[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
+            ),
+            ''
+          )
+          .match(symbolHeadReg)[0];
         if (matched2nd) newSum.answer = [...sum.answer, []];
       }
 
@@ -430,15 +450,15 @@ export function formSort(basePath: any, l: number, r: number, formData: any) {
   let _formData = { ...formData };
   for (let i = l < r ? l : l - 1; ; ) {
     if (
-      basePath[i].__idx__ === undefined ||
-      basePath[i + 1].__idx__ === undefined
+      basePath[i][INDEX_NAME] === undefined ||
+      basePath[i + 1][INDEX_NAME] === undefined
     ) {
       const tmp = _formData[basePath[i]];
       _formData[basePath[i]] = _formData[basePath[i + 1]];
       _formData[basePath[i + 1]] = tmp;
     } else {
-      const leftPrefix = basePath[i].__idx__;
-      const rightPrefix = basePath[i + 1].__idx__;
+      const leftPrefix = basePath[i][INDEX_NAME];
+      const rightPrefix = basePath[i + 1][INDEX_NAME];
       const leftIndex = leftPrefix.match(matchSeparator);
       const rightIndex = rightPrefix.match(matchSeparator);
       const prefix = rightPrefix.replace(matchSeparator, '');
@@ -458,7 +478,7 @@ function splitName(whole: string, pre: string, index: string) {
 }
 
 /**
- * 交换data，有副作用的操作
+ * 交换data，交换过程有副作用的操作，输出没有
  * @param leftPrefix
  * @param leftIndex
  * @param rightIndex
@@ -471,8 +491,17 @@ function exchangeData(
   formData: any
 ) {
   const _formData = { ...formData };
+  const prefix = new RegExp(
+    '^' +
+      leftPrefix.replace(
+        new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g'),
+        (item: string) => '\\' + item
+      ) +
+      leftIndex
+  );
   Object.keys(formData).forEach(item => {
-    if (item.match(new RegExp('^' + leftPrefix + leftIndex))) {
+    if (item.match(prefix)) {
+      // console.log(prefix);
       const [pre, mid, end] = splitName(item, leftPrefix, leftIndex);
       const tmp = _formData[pre + (leftIndex + '') + end];
       _formData[pre + (leftIndex + '') + end] =
@@ -483,21 +512,35 @@ function exchangeData(
   return _formData;
 }
 
-export function pushFormItem(dataPath: string, data: any, formData: any) {
+/**
+ * 截断path
+ * @param dataPath
+ */
+function genNames(dataPath: string) {
   const reg = /\]\[|\]\.|[\[\]\.]/g;
-  const names = dataPath.split(reg);
-  const types = dataPath.match(reg);
-  console.log(dataPath, names, types);
+  return { names: dataPath.split(reg), types: dataPath.match(reg) || [] };
+}
+
+/**
+ * 截断path
+ * @param dataPath
+ */
+function genPath(dataPath: string) {
+  const { names, types } = genNames(dataPath);
   let path = '';
   if (types) {
     names.forEach((item, index) => {
-      console.log(types[index]);
       path += item +=
         (types[index] &&
           (types[index].match(/\[$/) ? ARRAY_SEPARATOR : OBJECT_SEPARATOR)) ||
         '';
     });
   }
+  return path;
+}
+
+export function setFormItem(dataPath: any, data: any, formData: any) {
+  let path = genPath(dataPath);
   if (data.constructor === Object || data.constructor === Array) {
     let separator = OBJECT_SEPARATOR;
     if (data.constructor === Array) {
@@ -512,4 +555,90 @@ export function pushFormItem(dataPath: string, data: any, formData: any) {
     const target = {} as any;
     target[path] = { value: data };
   }
+}
+
+/**
+ * 删除指定item
+ * @param dataPath
+ * @param fieldName
+ * @param formData
+ */
+export function rmFormItem(dataPath: any, fieldName: any, formData: any) {
+  dataPath = dataPath[INDEX_NAME] ? dataPath[INDEX_NAME] : dataPath;
+  let _formData = { ...formData };
+  const { names, types } = genNames(dataPath);
+
+  if (types[types.length - 1] === ARRAY_SEPARATOR) {
+    const lastName = dataPath.replace(
+      new RegExp(`\\${ARRAY_SEPARATOR}\\d$`),
+      ''
+    );
+    const [...nameWithoutLastOne] = names;
+    nameWithoutLastOne.pop();
+    const target = [fieldName, ...nameWithoutLastOne].reduce(
+      (pre, cur) => pre[cur]
+    );
+    if (
+      target.length > 1 &&
+      (names[names.length - 1] as any) - 0 !== target.length - 1
+    ) {
+      _formData = formSort(
+        target,
+        (names[names.length - 1] as any) - 0,
+        target.length - 1,
+        _formData
+      );
+      dataPath = lastName + types[types.length - 1] + (target.length - 1);
+    }
+  }
+
+  const path = genPath(dataPath);
+  const newData = {} as any;
+  const pathRegExp = path.replace(
+    new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g'),
+    item => '\\' + item
+  );
+
+  const reg = new RegExp(
+    `^${pathRegExp}$|^${pathRegExp}[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
+  );
+  Object.keys(_formData).forEach(item => {
+    // console.log(item.match(reg), item);
+    // if (!item.match(new RegExp('^' + pathRegExp + '$'))) {
+    if (!item.match(reg)) {
+      newData[item] = _formData[item];
+    }
+  });
+  console.log(newData);
+  return newData;
+}
+
+/**
+ * 插入数据到数组中
+ * @param dataPath
+ * @param index
+ * @param data
+ * @param formData
+ */
+export function insertToForm(
+  dataPath: any,
+  index: any,
+  data: any,
+  formData: any
+) {
+  if (index < 0) throw 'The parameter `index` can NOT less than 0!';
+  const maxLen = dataPath.length;
+  index = maxLen < index ? maxLen : index;
+  const _dataPath = dataPath[INDEX_NAME] + ARRAY_SEPARATOR + maxLen;
+
+  const _formData = { ...formData, ...setFormItem(_dataPath, data, formData) };
+  if (maxLen === index) return _formData;
+  const fieldName = field2Obj(_formData, false);
+  const targetPath = [
+    fieldName,
+    ...dataPath[INDEX_NAME].split(
+      new RegExp(`\\${ARRAY_SEPARATOR}|\\${OBJECT_SEPARATOR}`, 'g')
+    ),
+  ].reduce((pre, curr) => pre[curr]);
+  return formSort(targetPath, maxLen, index, _formData);
 }

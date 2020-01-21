@@ -40,14 +40,14 @@ function injectProps<T>(
 }
 
 function childrenDealer<T>(
-  children: React.ReactElement,
+  children: React.ReactElement | [React.ReactElement],
   props: FormComponentProps & React.PropsWithChildren<T>,
   index: ReactText
 ): React.ReactElement | [React.ReactElement] | undefined {
   const { form, ...other } = props;
-
+  if (children === undefined) return;
   if (children.constructor === Array) {
-    return ((children as any) as [React.ReactElement]).map((item, index) => {
+    return (children as [React.ReactElement]).map((item, index) => {
       return childrenDealer(item, props, item.key || index);
     }) as [React.ReactElement];
   }
@@ -81,7 +81,7 @@ function childrenDealer<T>(
     return injectProps(
       children as React.ReactElement,
       form,
-      children.key || index
+      (children as React.ReactElement).key || index
     );
   }
   // AutoBind
