@@ -21,6 +21,7 @@ import DmForm, {
   formSort,
   setFormItem,
   rmFormItem,
+  insertToForm,
 } from './DmForm';
 import Base from './Base';
 import Submit from './Submit';
@@ -104,7 +105,7 @@ function OneStepForm() {
   } = useOneStep(
     {
       captcha: '我是自定义组件',
-      captcha2: '我是内嵌布局',
+      captcha2: { name: '我是内嵌布局' },
       text: 'something000@123.com',
       yo: '我也是',
       list: ' '
@@ -138,26 +139,39 @@ function OneStepForm() {
 
   // console.log(fieldName);
 
-  const addField = () => {
+  const addAfter = (index: number) => {
     const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
-    const newData = setFormItem(
-      `listWithObj[${len + 1}`,
+    const newData = insertToForm(
+      fieldName.listWithObj,
+      index + 1,
       {
-        name: '双倍快乐' + len + 1,
+        name: '双倍快乐' + len,
         password: 'cola',
       },
       formData
     );
-    console.log(newData);
-    setFormData({
-      ...formData,
-      ...newData,
-    });
+    setFormData(newData);
   };
 
-  const rmField = () => {
-    const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
-    const newData = rmFormItem(`listWithObj[${0}`, fieldName, formData);
+  const rmField = (index: number) => {
+    // const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
+    // console.log(fieldName.listWithObj[0]);
+    console.log(fieldName.listWithObj[index], index);
+    const newData = rmFormItem(
+      fieldName.listWithObj[index],
+      fieldName,
+      formData
+    );
+    setFormData(newData);
+  };
+
+  const rmCaptcha = () => {
+    const newData = rmFormItem(fieldName.captcha, fieldName, formData);
+    setFormData(newData);
+  };
+
+  const rmCaptcha2 = () => {
+    const newData = rmFormItem(fieldName.captcha2.name, fieldName, formData);
     setFormData(newData);
   };
 
@@ -179,51 +193,59 @@ function OneStepForm() {
             item={item}
             index={index}
             key={index}
+            addAfter={addAfter}
+            rmField={rmField}
             afterSort={afterSort2}
           />
         ))}
       </DndProvider>
       <Input name="yo" label="yo" />
-      {({ form: { getFieldDecorator } }: FormComponentProps) => (
-        <FormAntd.Item label={'自定义组件'}>
+      {fieldName['captcha'] && (
+        <div>
+          {({ form: { getFieldDecorator } }: FormComponentProps) => (
+            <FormAntd.Item label={'自定义组件'}>
+              <Row gutter={8}>
+                <Col span={14}>
+                  {getFieldDecorator('captcha', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the captcha you got!',
+                      },
+                    ],
+                  })(<InputAntd />)}
+                </Col>
+                <Col span={10}>
+                  <Button onClick={() => rmCaptcha()}>rm captcha</Button>
+                </Col>
+              </Row>
+            </FormAntd.Item>
+          )}
+        </div>
+      )}
+      {fieldName['captcha2'] && (
+        <FormItem label="内嵌布局">
           <Row gutter={8}>
             <Col span={14}>
-              {getFieldDecorator('captcha', {
-                rules: [
+              <Input
+                name={fieldName['captcha2'] && fieldName['captcha2']['name']}
+                rules={[
                   {
                     required: true,
                     message: 'Please input the captcha you got!',
                   },
-                ],
-              })(<InputAntd />)}
+                ]}
+              />
             </Col>
             <Col span={10}>
-              <Button>Get captcha</Button>
+              <Button onClick={() => rmCaptcha2()}>Get captcha</Button>
             </Col>
           </Row>
-        </FormAntd.Item>
+        </FormItem>
       )}
-      <FormItem label="内嵌布局">
-        <Row gutter={8}>
-          <Col span={14}>
-            <Input
-              name="captcha2"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the captcha you got!',
-                },
-              ]}
-            />
-          </Col>
-          <Col span={10}>
-            <Button>Get captcha</Button>
-          </Col>
-        </Row>
-      </FormItem>
-      <Button onClick={addField}>add</Button>
+      {/* <Button onClick={addField}>add</Button>
       &nbsp;&nbsp;
-      <Button onClick={rmField}>rm</Button>
+      <Button onClick={rmField}>rm</Button> */}
       <Submit name="submit" />
     </MyForm>
   );
@@ -286,8 +308,14 @@ function Card(props: { item: any; index: any; afterSort: any }) {
   );
 }
 
-function DoubleCard(props: { item: any; index: any; afterSort: any }) {
-  const { item, index, afterSort, ...other } = props;
+function DoubleCard(props: {
+  item: any;
+  index: any;
+  afterSort: any;
+  addAfter: any;
+  rmField: any;
+}) {
+  const { item, index, afterSort, addAfter, rmField, ...other } = props;
 
   const [{ isDragging }, drag, ConnectDragPreview] = useDrag({
     item: { type: ItemTypes.CARD },
@@ -334,11 +362,37 @@ function DoubleCard(props: { item: any; index: any; afterSort: any }) {
           display: 'inline-block',
           position: 'absolute',
           zIndex: 99,
-          left: '0px',
+          left: '4px',
           top: '0px',
         }}
       >
         三
+      </span>
+      <span
+        onClick={() => addAfter(index)}
+        style={{
+          display: 'inline-block',
+          position: 'absolute',
+          zIndex: 99,
+          left: '4px',
+          cursor: 'pointer',
+          top: '20px',
+        }}
+      >
+        add
+      </span>
+      <span
+        onClick={() => rmField(index)}
+        style={{
+          display: 'inline-block',
+          position: 'absolute',
+          zIndex: 99,
+          left: '4px',
+          cursor: 'pointer',
+          top: '40px',
+        }}
+      >
+        rm
       </span>
       <Input
         key={item.name}

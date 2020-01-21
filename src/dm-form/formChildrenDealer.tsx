@@ -45,7 +45,7 @@ function childrenDealer<T>(
   index: ReactText
 ): React.ReactElement | [React.ReactElement] | undefined {
   const { form, ...other } = props;
-
+  if (children === undefined) return;
   if (children.constructor === Array) {
     return (children as [React.ReactElement]).map((item, index) => {
       return childrenDealer(item, props, item.key || index);

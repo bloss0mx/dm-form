@@ -171,7 +171,7 @@ type FieldToState2<T> = {
     ? Array<FieldToState2<T[P]>>
     : {
         value: T[P];
-      }
+      };
 };
 type fieldIniter = <T>(field: T) => FieldToState2<T>;
 
@@ -302,36 +302,24 @@ function _field2Obj(
         // 本层不同
         if (symbol === OBJECT_SEPARATOR) {
           // 对象
+          const target = _field2Obj(
+            nextField,
+            getValue,
+            {},
+            currName + curr + symbol
+          );
+          if (!getValue) {
+            Object.defineProperty(target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+          }
           if (obj.constructor === Array) {
-            const target = _field2Obj(
-              nextField,
-              getValue,
-              {},
-              currName + curr + symbol
-            );
-            if (!getValue)
-              Object.defineProperty(target, INDEX_NAME, {
-                enumerable: false,
-                configurable: false,
-                writable: true,
-                value: currName + curr,
-              });
             obj.push(target);
           } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = {};
-            const target = _field2Obj(
-              nextField,
-              getValue,
-              {},
-              currName + curr + symbol
-            );
-            if (!getValue)
-              Object.defineProperty(target, INDEX_NAME, {
-                enumerable: false,
-                configurable: false,
-                writable: true,
-                value: currName + curr,
-              });
             obj[curr] = {
               ...obj[curr],
               ...target,
@@ -339,16 +327,30 @@ function _field2Obj(
           }
         } else if (symbol === ARRAY_SEPARATOR) {
           // 数组
-          if (obj.constructor === Array)
-            obj.push(
-              _field2Obj(nextField, getValue, [], currName + curr + symbol)
-            );
-          else if (obj.constructor === Object) {
+          const target = _field2Obj(
+            nextField,
+            getValue,
+            [],
+            currName + curr + symbol
+          );
+          if (obj.constructor === Array) {
+            Object.defineProperty(target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+            obj.push(target);
+          } else if (obj.constructor === Object) {
             if (obj[curr] === undefined) obj[curr] = [];
-            obj[curr] = [
-              ...obj[curr],
-              ..._field2Obj(nextField, getValue, [], currName + curr + symbol),
-            ];
+            const _target = [...obj[curr], ...target];
+            Object.defineProperty(_target, INDEX_NAME, {
+              enumerable: false,
+              configurable: false,
+              writable: true,
+              value: currName + curr,
+            });
+            obj[curr] = _target;
           }
         }
         nextField = {};
@@ -476,7 +478,7 @@ function splitName(whole: string, pre: string, index: string) {
 }
 
 /**
- * 交换data，有副作用的操作
+ * 交换data，交换过程有副作用的操作，输出没有
  * @param leftPrefix
  * @param leftIndex
  * @param rightIndex
@@ -499,7 +501,7 @@ function exchangeData(
   );
   Object.keys(formData).forEach(item => {
     if (item.match(prefix)) {
-      console.log(prefix);
+      // console.log(prefix);
       const [pre, mid, end] = splitName(item, leftPrefix, leftIndex);
       const tmp = _formData[pre + (leftIndex + '') + end];
       _formData[pre + (leftIndex + '') + end] =
@@ -510,10 +512,19 @@ function exchangeData(
   return _formData;
 }
 
+/**
+ * 截断path
+ * @param dataPath
+ */
 function genNames(dataPath: string) {
   const reg = /\]\[|\]\.|[\[\]\.]/g;
-  return { names: dataPath.split(reg), types: dataPath.match(reg) };
+  return { names: dataPath.split(reg), types: dataPath.match(reg) || [] };
 }
+
+/**
+ * 截断path
+ * @param dataPath
+ */
 function genPath(dataPath: string) {
   const { names, types } = genNames(dataPath);
   let path = '';
@@ -528,7 +539,7 @@ function genPath(dataPath: string) {
   return path;
 }
 
-export function setFormItem(dataPath: string, data: any, formData: any) {
+export function setFormItem(dataPath: any, data: any, formData: any) {
   let path = genPath(dataPath);
   if (data.constructor === Object || data.constructor === Array) {
     let separator = OBJECT_SEPARATOR;
@@ -546,43 +557,88 @@ export function setFormItem(dataPath: string, data: any, formData: any) {
   }
 }
 
-export function rmFormItem(dataPath: string, fieldName: any, formData: any) {
+/**
+ * 删除指定item
+ * @param dataPath
+ * @param fieldName
+ * @param formData
+ */
+export function rmFormItem(dataPath: any, fieldName: any, formData: any) {
+  dataPath = dataPath[INDEX_NAME] ? dataPath[INDEX_NAME] : dataPath;
   let _formData = { ...formData };
+  const { names, types } = genNames(dataPath);
+
+  if (types[types.length - 1] === ARRAY_SEPARATOR) {
+    const lastName = dataPath.replace(
+      new RegExp(`\\${ARRAY_SEPARATOR}\\d$`),
+      ''
+    );
+    const [...nameWithoutLastOne] = names;
+    nameWithoutLastOne.pop();
+    const target = [fieldName, ...nameWithoutLastOne].reduce(
+      (pre, cur) => pre[cur]
+    );
+    if (
+      target.length > 1 &&
+      (names[names.length - 1] as any) - 0 !== target.length - 1
+    ) {
+      _formData = formSort(
+        target,
+        (names[names.length - 1] as any) - 0,
+        target.length - 1,
+        _formData
+      );
+      dataPath = lastName + types[types.length - 1] + (target.length - 1);
+    }
+  }
+
   const path = genPath(dataPath);
   const newData = {} as any;
   const pathRegExp = path.replace(
     new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g'),
     item => '\\' + item
   );
-  const { names } = genNames(dataPath);
-  const _names = names;
-  _names.splice(names.length - 1, 1);
-  const target = [fieldName, ..._names].reduce((sum, index) => {
-    console.log(sum, index);
-    return sum[index];
-  });
-  const lastOneIndex = target.length - 1;
 
-  console.log(target);
-
-  const separator = path.match(
-    new RegExp(`[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`, 'g')
+  const reg = new RegExp(
+    `^${pathRegExp}$|^${pathRegExp}[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}]`
   );
-  if (separator && separator[0] === ARRAY_SEPARATOR) {
-    const found = path.match(/\d$/);
-    if (found) {
-      const targetIndex = (found[0] as any) - 0;
-      console.log(path, targetIndex, lastOneIndex, formData);
-      _formData = formSort(path, targetIndex, lastOneIndex, formData);
-      console.log(_formData);
-    }
-  }
-
   Object.keys(_formData).forEach(item => {
-    if (!item.match(new RegExp('^' + pathRegExp))) {
+    // console.log(item.match(reg), item);
+    // if (!item.match(new RegExp('^' + pathRegExp + '$'))) {
+    if (!item.match(reg)) {
       newData[item] = _formData[item];
     }
   });
   console.log(newData);
   return newData;
+}
+
+/**
+ * 插入数据到数组中
+ * @param dataPath
+ * @param index
+ * @param data
+ * @param formData
+ */
+export function insertToForm(
+  dataPath: any,
+  index: any,
+  data: any,
+  formData: any
+) {
+  if (index < 0) throw 'The parameter `index` can NOT less than 0!';
+  const maxLen = dataPath.length;
+  index = maxLen < index ? maxLen : index;
+  const _dataPath = dataPath[INDEX_NAME] + ARRAY_SEPARATOR + maxLen;
+
+  const _formData = { ...formData, ...setFormItem(_dataPath, data, formData) };
+  if (maxLen === index) return _formData;
+  const fieldName = field2Obj(_formData, false);
+  const targetPath = [
+    fieldName,
+    ...dataPath[INDEX_NAME].split(
+      new RegExp(`\\${ARRAY_SEPARATOR}|\\${OBJECT_SEPARATOR}`, 'g')
+    ),
+  ].reduce((pre, curr) => pre[curr]);
+  return formSort(targetPath, maxLen, index, _formData);
 }
