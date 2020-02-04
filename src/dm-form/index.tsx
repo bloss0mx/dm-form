@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  CSSProperties,
+} from 'react';
 import { Form as FormAntd, Input as InputAntd, Row, Col } from 'antd';
 import Form, { FormComponentProps } from 'antd/lib/form';
 import moment, { Moment } from 'moment';
@@ -102,6 +108,9 @@ function OneStepForm() {
     handleFormChange,
     fieldName,
     sortForm,
+    insertToArray,
+    removeItem,
+    setItem,
   } = useOneStep(
     {
       captcha: '我是自定义组件',
@@ -141,41 +150,25 @@ function OneStepForm() {
 
   const addAfter = (index: number) => {
     const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
-    const newData = insertToForm(
-      fieldName.listWithObj,
-      index + 1,
-      {
-        name: '双倍快乐' + len,
-        password: 'cola',
-      },
-      formData
-    );
-    setFormData(newData);
+    insertToArray(fieldName.listWithObj, index + 1, {
+      name: '双倍快乐' + len,
+      password: 'cola',
+    });
   };
 
   const rmField = (index: number) => {
-    // const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
-    // console.log(fieldName.listWithObj[0]);
-    console.log(fieldName.listWithObj[index], index);
-    const newData = rmFormItem(
-      fieldName.listWithObj[index],
-      fieldName,
-      formData
-    );
-    setFormData(newData);
+    removeItem(fieldName.listWithObj[index]);
   };
 
   const rmCaptcha = () => {
-    const newData = rmFormItem(fieldName.captcha, fieldName, formData);
-    setFormData(newData);
+    removeItem(fieldName.captcha);
   };
 
   const rmCaptcha2 = () => {
-    const newData = rmFormItem(fieldName.captcha2.name, fieldName, formData);
-    setFormData(newData);
+    removeItem(fieldName.captcha2.name);
   };
 
-  console.log(fieldName);
+  console.warn(fieldName);
 
   return (
     <MyForm onChange={handleFormChange} {...formData}>
@@ -346,6 +339,13 @@ function DoubleCard(props: {
 
   // console.log(item);
 
+  const style = {
+    display: 'inline-block',
+    position: 'absolute',
+    zIndex: 99,
+    left: '4px',
+  } as CSSProperties;
+
   return ConnectDragPreview(
     <div
       ref={drop}
@@ -359,10 +359,7 @@ function DoubleCard(props: {
       <span
         ref={drag}
         style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
+          ...style,
           top: '0px',
         }}
       >
@@ -370,27 +367,13 @@ function DoubleCard(props: {
       </span>
       <span
         onClick={() => addAfter(index)}
-        style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
-          cursor: 'pointer',
-          top: '20px',
-        }}
+        style={{ ...style, cursor: 'pointer', top: '20px' }}
       >
         add
       </span>
       <span
         onClick={() => rmField(index)}
-        style={{
-          display: 'inline-block',
-          position: 'absolute',
-          zIndex: 99,
-          left: '4px',
-          cursor: 'pointer',
-          top: '40px',
-        }}
+        style={{ ...style, cursor: 'pointer', top: '40px' }}
       >
         rm
       </span>

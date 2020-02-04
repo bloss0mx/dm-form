@@ -126,6 +126,19 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
   const sortForm = (fieldName: any, l: number, r: number) => {
     setFormData(formSort(fieldName, l, r, formData));
   };
+
+  const insertToArray = (fieldName: any, index: number, data: any) => {
+    setFormData(insertToForm(fieldName, index, data, formData));
+  };
+
+  const removeItem = (dataPath: any) => {
+    setFormData(rmFormItem(dataPath, fieldName, formData));
+  };
+
+  const setItem = (dataPath: any, data: any) => {
+    setFormItem(dataPath, data, formData);
+  };
+
   // console.timeEnd('useOneStep3');
   return {
     formData,
@@ -134,6 +147,9 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
     handleFormChange,
     fieldName,
     sortForm,
+    insertToArray,
+    removeItem,
+    setItem,
   };
 }
 
@@ -473,7 +489,13 @@ export function formSort(basePath: any, l: number, r: number, formData: any) {
   return _formData;
 }
 
-function splitName(whole: string, pre: string, index: string) {
+function splitName(whole: string, pre: string) {
+  const index = whole
+    .replace(pre, '')
+    .replace(
+      new RegExp('[\\${OBJECT_SEPARATOR}\\${ARRAY_SEPARATOR}][\\S]+$'),
+      ''
+    );
   return [pre, index, whole.replace(pre + index, '')];
 }
 
@@ -501,8 +523,7 @@ function exchangeData(
   );
   Object.keys(formData).forEach(item => {
     if (item.match(prefix)) {
-      // console.log(prefix);
-      const [pre, mid, end] = splitName(item, leftPrefix, leftIndex);
+      const [pre, mid, end] = splitName(item, leftPrefix);
       const tmp = _formData[pre + (leftIndex + '') + end];
       _formData[pre + (leftIndex + '') + end] =
         _formData[pre + (rightIndex + '') + end];
@@ -539,6 +560,12 @@ function genPath(dataPath: string) {
   return path;
 }
 
+/**
+ * 设置form条目的值
+ * @param dataPath
+ * @param data
+ * @param formData
+ */
 export function setFormItem(dataPath: any, data: any, formData: any) {
   let path = genPath(dataPath);
   if (data.constructor === Object || data.constructor === Array) {
@@ -609,7 +636,6 @@ export function rmFormItem(dataPath: any, fieldName: any, formData: any) {
       newData[item] = _formData[item];
     }
   });
-  console.log(newData);
   return newData;
 }
 
@@ -622,7 +648,7 @@ export function rmFormItem(dataPath: any, fieldName: any, formData: any) {
  */
 export function insertToForm(
   dataPath: any,
-  index: any,
+  index: number,
   data: any,
   formData: any
 ) {
