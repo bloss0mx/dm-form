@@ -116,6 +116,7 @@ function OneStepForm() {
       captcha: '我是自定义组件',
       captcha2: { name: '我是内嵌布局' },
       text: 'something000@123.com',
+      text2: 'anyother@yoo.com',
       yo: '我也是',
       list: ' '
         .repeat(3)
@@ -125,14 +126,16 @@ function OneStepForm() {
         .map(item => 'lPhone ' + item + ''),
       a: [{ b: 'str' }],
       listWithObj: ' '
-        .repeat(3)
+        .repeat(20)
         .split('')
         .map((_, index) => ({
           name: 'Wawei P' + (3 - index) * 10,
           password: randomPwd() + randomPwd(),
         })),
     },
-    console.log
+    (data: any) => {
+      console.log(data);
+    }
   );
 
   const list = fieldName.list || [];
@@ -168,11 +171,17 @@ function OneStepForm() {
     removeItem(fieldName.captcha2.name);
   };
 
-  console.warn(fieldName);
+  // console.warn(fieldName, formData);
 
   return (
-    <MyForm onChange={handleFormChange} {...formData}>
+    <MyForm onChange={handleFormChange} {...formData} formData={formData}>
       <Input name="text" label="text" type="email" extra={'加个extra会怎样'} />
+      <Input
+        name="text2"
+        label="text2"
+        type="email"
+        extra={'加个extra会怎样'}
+      />
       <h3>以下红框部分是可以拖动的</h3>
       <DndProvider backend={HTML5Backend}>
         {list.map((item: string, index: number) => (

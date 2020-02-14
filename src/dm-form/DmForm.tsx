@@ -3,6 +3,7 @@ import { Form } from 'antd';
 import { FormComponentProps, FormCreateOption } from 'antd/es/form';
 import { content } from './formChildrenDealer';
 import { FormProps, value } from './formChildrenDealer';
+import { start, pause, end } from './tools';
 
 interface FormOnly<T> {
   onSubmit: (values: T) => value;
@@ -14,10 +15,14 @@ export const INDEX_NAME = '__idx__';
 
 function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
   class DmForm<P> extends React.PureComponent<
-    FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
+    FormProps<T> &
+      FormComponentProps &
+      React.PropsWithChildren<P> & { formData: any }
   > {
     constructor(
-      props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
+      props: FormProps<T> &
+        FormComponentProps &
+        React.PropsWithChildren<P> & { formData: any }
     ) {
       super(props);
       this.handleSubmit = this.handleSubmit.bind(this);
@@ -36,7 +41,7 @@ function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
     }
 
     render() {
-      const { form, children } = this.props;
+      const { form, children, formData } = this.props;
       return (
         <Form
           labelCol={{
@@ -49,7 +54,12 @@ function Init<T>(actions?: FormProps<T> & FormOnly<T>) {
           }}
           onSubmit={this.handleSubmit}
         >
-          {content({ ...{ form, children } })}
+          {(() => {
+            start('content');
+            const answer = content({ ...{ form, children, formData } });
+            pause('content');
+            return answer;
+          })()}
         </Form>
       );
     }
@@ -108,6 +118,7 @@ export const useFormComponent = (onSubmit?: Function) => {
  * @param onSubmit onsubmit事件
  */
 export function useOneStep(initState?: any, onSubmit?: Function) {
+  start('use one step');
   // console.time('useOneStep1');
   const [formData, setFormData] = useFormState(initState || {});
   // console.timeEnd('useOneStep1');
@@ -138,6 +149,8 @@ export function useOneStep(initState?: any, onSubmit?: Function) {
   const setItem = (dataPath: any, data: any) => {
     setFormItem(dataPath, data, formData);
   };
+
+  pause('use one step');
 
   // console.timeEnd('useOneStep3');
   return {
@@ -396,7 +409,10 @@ function _field2Obj(
  * @param getValue 为true将filed转换为js对象，为false时输出以js对象的方式输出field中的名字
  */
 export function field2Obj(field: any, getValue: boolean = true) {
-  return _field2Obj(field, getValue);
+  start('field2Obj');
+  const answer = _field2Obj(field, getValue);
+  pause('field2Obj');
+  return answer;
 }
 
 const symbolHeadReg = new RegExp(
@@ -668,3 +684,146 @@ export function insertToForm(
   ].reduce((pre, curr) => pre[curr]);
   return formSort(targetPath, maxLen, index, _formData);
 }
+
+let __index__ = 0;
+function indexGenerator() {
+  return __index__++;
+}
+
+function toIndexed(obj: any, store: any, answer: any = {}) {
+  const keys = Object.keys(obj);
+
+  for (const i of keys) {
+    let target = {};
+    const indexName = indexGenerator();
+
+    if (obj[i].constructor === Object) {
+      target = toIndexed(obj[i], store, {});
+    } else if (obj[i].constructor === Array) {
+      target = toIndexed(obj[i], store, []);
+    }
+    store[indexName] = obj[i];
+
+    Object.defineProperty(target, INDEX_NAME, {
+      enumerable: false,
+      configurable: false,
+      writable: true,
+      value: indexName,
+    });
+
+    answer[i] = target;
+  }
+  return answer;
+}
+
+function tostore(index: any, store: any, answer: any = {}) {
+  const keys = Object.keys(index);
+  for (const i of keys) {
+    let target;
+
+    if (index[i].constructor === Object && Object.keys(index[i]).length !== 0) {
+      answer[i] = tostore(index[i], store, {});
+    } else if (
+      index[i].constructor === Array &&
+      Object.keys(index[i]).length !== 0
+    ) {
+      answer[i] = tostore(index[i], store, []);
+    } else {
+      answer[i] = store[index[i][INDEX_NAME]];
+    }
+  }
+  return answer;
+}
+
+function changestore(
+  index: any,
+  path: Array<string | number>,
+  store: any,
+  data: any
+) {
+  const curr = [index, ...path].reduce((sum, curr) => sum[curr]);
+  const _index = curr[INDEX_NAME];
+  store[_index] = data;
+}
+
+if (false) {
+  const store = {};
+  const origin = { a: { d: 'x' }, b: [1, 2, 3], c: 'w' };
+  const index = toIndexed(origin, store);
+  console.log(index);
+  console.log(store);
+  console.error('>>>>>>>>>>>>>>>>>>>>>>>');
+  console.log(tostore(index, store));
+
+  console.error('-----------------------');
+  console.log('排序测试');
+  const store1 = {};
+  const origin1 = { arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0] };
+  const index1 = toIndexed(origin1, store1);
+  const _index1 = {
+    arr: index1.arr.sort((a: any, b: any) => b[INDEX_NAME] - a[INDEX_NAME]),
+  };
+  console.log(
+    index1.arr,
+    _index1.arr,
+    origin1.arr,
+    tostore(_index1, store1).arr
+  );
+  console.log('排序用索引');
+
+  console.error('=======================');
+  console.log('修改数据');
+  const store2 = {};
+  const origin2 = { arr: [4, 2, 1, 3] };
+  const index2 = toIndexed(origin2, store2);
+  changestore(index2, ['arr', 2], store2, 5);
+  console.log(tostore(index2, store2));
+
+  console.error('<<<<<<<<<<<<<<<<<<<<<<<');
+
+  const store3 = {};
+  const origin3 = { arr: [4, 2, 1, 3] };
+  const index3 = toIndexed(origin3, store3);
+}
+
+// sublime text 你......
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
