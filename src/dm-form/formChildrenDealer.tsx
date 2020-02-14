@@ -14,19 +14,20 @@ export type FormItemProps = FormItemPropsAntd;
 function injectProps<T>(
   _children: React.ReactElement,
   form: FormComponentProps['form'],
+  formData: any,
   key: ReactText
 ): React.ReactElement {
   const { children } = _children.props;
 
   if (_children.type === Form.Item) {
-    return content({ form, children }) as React.ReactElement;
+    return content({ form, children, formData }) as React.ReactElement;
   } else if (isDOMElement(_children)) {
     return React.cloneElement(
       _children,
       {
         key,
       },
-      children ? content({ form, children }) : undefined
+      children ? content({ form, children, formData }) : undefined
     );
   }
   return React.cloneElement(
@@ -34,17 +35,18 @@ function injectProps<T>(
     {
       key,
       form,
+      formData,
     },
-    children ? content({ form, children }) : undefined
+    children ? content({ form, children, formData }) : undefined
   );
 }
 
 function childrenDealer<T>(
   children: React.ReactElement | [React.ReactElement],
-  props: FormComponentProps & React.PropsWithChildren<T>,
+  props: FormComponentProps & React.PropsWithChildren<T> & { formData?: any },
   index: ReactText
 ): React.ReactElement | [React.ReactElement] | undefined {
-  const { form, ...other } = props;
+  const { form, formData, ...other } = props;
   if (children === undefined) return;
   if (children.constructor === Array) {
     return (children as [React.ReactElement]).map((item, index) => {
@@ -81,6 +83,7 @@ function childrenDealer<T>(
     return injectProps(
       children as React.ReactElement,
       form,
+      formData,
       (children as React.ReactElement).key || index
     );
   }
@@ -104,14 +107,16 @@ function childrenDealer<T>(
   }
   // 单个有效子节点
   if (React.isValidElement(children)) {
-    return injectProps(children, form, children.key || index);
+    return injectProps(children, form, formData, children.key || index);
   }
   // 其他类型
   return children;
 }
 
 export function content<T, P>(
-  props: FormProps<T> & FormComponentProps & React.PropsWithChildren<P>
+  props: FormProps<T> &
+    FormComponentProps &
+    React.PropsWithChildren<P> & { formData?: any }
 ): React.ReactNodeArray | undefined | React.ReactNode {
   const { children } = props;
   if (children === undefined) {
