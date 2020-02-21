@@ -17,17 +17,17 @@ import Input from './Input';
 import InputNumber from './InputNumber';
 import DmForm, {
   fieldIniter,
-  field2Obj,
-  obj2Field,
-  list,
+  // field2Obj,
+  // obj2Field,
+  // list,
   beforeUseForm,
   useFormState,
   useFormComponent,
   useOneStep,
-  formSort,
-  setFormItem,
-  rmFormItem,
-  insertToForm,
+  // formSort,
+  // setFormItem,
+  // rmFormItem,
+  // insertToForm,
 } from './DmForm';
 import Base from './Base';
 import Submit from './Submit';
@@ -57,8 +57,8 @@ export {
   NoReRender,
   //
   fieldIniter,
-  field2Obj,
-  obj2Field,
+  // field2Obj,
+  // obj2Field,
 };
 
 // console.log(Input instanceof Base);
@@ -119,14 +119,14 @@ function OneStepForm() {
       text2: 'anyother@yoo.com',
       yo: '我也是',
       list: ' '
-        .repeat(3)
+        .repeat(5)
         .split('')
         .map((_, index) => `${12 - index}`)
         // .sort((a: string, b: string) => parseInt(a) - parseInt(b))
         .map(item => 'lPhone ' + item + ''),
       a: [{ b: 'str' }],
       listWithObj: ' '
-        .repeat(20)
+        .repeat(0)
         .split('')
         .map((_, index) => ({
           name: 'Wawei P' + (3 - index) * 10,
@@ -153,6 +153,7 @@ function OneStepForm() {
 
   const addAfter = (index: number) => {
     const len = (fieldName.listWithObj && fieldName.listWithObj.length) || 0;
+    console.log(fieldName.listWithObj, index);
     insertToArray(fieldName.listWithObj, index + 1, {
       name: '双倍快乐' + len,
       password: 'cola',
@@ -171,7 +172,7 @@ function OneStepForm() {
     removeItem(fieldName.captcha2.name);
   };
 
-  // console.warn(fieldName, formData);
+  console.warn(fieldName, formData);
 
   return (
     <MyForm onChange={handleFormChange} {...formData} formData={formData}>
@@ -189,6 +190,7 @@ function OneStepForm() {
         ))}
       </DndProvider>
       <h2>双倍快乐</h2>
+      <a onClick={() => addAfter(0)}>add</a>
       <DndProvider backend={HTML5Backend}>
         {listWithObj.map((item: string, index: number) => (
           <DoubleCard
@@ -401,3 +403,52 @@ function DoubleCard(props: {
     </div>
   );
 }
+
+//////
+//////
+//////
+//////
+
+// export const ARRAY_SEPARATOR = '[';
+// export const OBJECT_SEPARATOR = '{';
+// export const INDEX_NAME = '__idx__';
+
+// const store: any = {};
+// const origin = { a: { d: 'x', e: [1, 3, 5] }, b: [1, 2, 3], c: 'w' };
+// const index = toIndexed(origin, store);
+// console.log('index', index, index.a[INDEX_NAME]);
+// console.log(origin, store);
+// console.error('>>>>>>>>>>>>>>>>>>>>>>>');
+// console.log(toStore(index, store));
+
+// let obj = {
+
+//   get index(){
+//   },
+
+// }
+
+// console.error('-----------------------');
+// console.log('排序测试');
+// const store1 = {};
+// const origin1 = { arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0] };
+// const index1 = toIndexed(origin1, store1);
+// const _index1 = {
+//   arr: index1.arr.sort((a: any, b: any) => b[INDEX_NAME] - a[INDEX_NAME]),
+// };
+// console.log(index1.arr, _index1.arr, origin1.arr, toStore(_index1, store1).arr);
+// console.log('排序用索引');
+
+// console.error('=======================');
+// console.log('修改数据');
+// const store2 = {};
+// const origin2 = { arr: [4, 2, 1, 3] };
+// const index2 = toIndexed(origin2, store2);
+// changeStore(index2, ['arr', 2], store2, 5);
+// console.log(toStore(index2, store2));
+
+// console.error('<<<<<<<<<<<<<<<<<<<<<<<');
+
+// const store3 = {};
+// const origin3 = { arr: [4, 2, 1, 3] };
+// const index3 = toIndexed(origin3, store3);

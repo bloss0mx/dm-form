@@ -53,7 +53,14 @@ export default class BBase extends React.Component<
     this.state = { val: undefined, err: undefined, touched: undefined };
   }
 
-  shouldComponentUpdate(nextProps: props & base) {
+  shouldComponentUpdate(
+    nextProps: props & base,
+    nextState: {
+      val: any;
+      err: any;
+      touched: any;
+    }
+  ) {
     const labelShould = 'should';
     start(labelShould);
     if (nextProps.forceRender === true) return true;
@@ -62,19 +69,16 @@ export default class BBase extends React.Component<
       name,
       formData,
     } = nextProps;
-    const { val, err, touched } = this.state;
-    start('get val');
-    const _val = formData && formData[name] && formData[name]['value'];
-    pause('get val');
-    start('get error');
-    const _err = getFieldError(name);
-    pause('get error');
-    start('get touched');
-    const _touched = isFieldTouched(name);
-    pause('get touched');
-    if (val !== _val || err !== _err || touched !== _touched) {
-      this.setState({ val: _val, err: _err, touched: _touched });
+
+    const newState = {
+      val: formData && formData[name] && formData[name]['value'],
+      err: getFieldError(name),
+      touched: isFieldTouched(name),
+    };
+    if (compare(newState, nextState)) {
+      this.setState(newState);
       pause(labelShould);
+      // console.log('change');
       return true;
     }
     if (nextProps.forceStop === true) {
@@ -208,7 +212,6 @@ function compare(left: any, right: any) {
   if (left.constructor !== right.constructor) return true;
   if (left.constructor !== Array && left.constructor !== Object) {
     if (left !== right) {
-      console.log(left, right);
       return true;
     }
     return false;
@@ -220,7 +223,6 @@ function compare(left: any, right: any) {
   if (setTest.size !== lKey.length || setTest.size !== rKey.length) return true;
   for (let i = 0; i < lKey.length; i++) {
     if (compare(left[lKey[i]], right[rKey[i]])) {
-      console.log(left[lKey[i]], right[rKey[i]], i);
       return true;
     }
   }
